@@ -4,6 +4,7 @@
 
 var gsap = require('gsap');
 import Sketch_1 from "./Sketch_1.js";
+import Sketch_2 from "./Sketch_2.js";
 
 
 class Sketches {
@@ -12,15 +13,15 @@ class Sketches {
     constructor() {
         console.log('Sketches!');
 
-        var sketch_1 = new Sketch_1();
+        var sketch = new Sketch_2();
 
-        TweenMax.delayedCall(3, function () {
-            sketch_1.start();
-        })
-
-        TweenMax.delayedCall(6, function () {
-            sketch_1.stop();
-        })
+        // TweenMax.delayedCall(3, function () {
+        //     sketch.start();
+        // })
+        //
+        // TweenMax.delayedCall(6, function () {
+        //     sketch.stop();
+        // })
 
 
     }

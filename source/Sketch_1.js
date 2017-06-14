@@ -23,8 +23,8 @@ class Sketch_1 extends SketchTemplate {
         this.sketch.setup = function () {
             // console.log(QUARTER_PI)
 
-            this.lineCap = 'round';
-            this.lineJoin = 'round';
+            // this.lineCap = 'round';
+            // this.lineJoin = 'round';
         };
 
         this.sketch.mousedown = function () {
