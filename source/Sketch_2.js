@@ -52,7 +52,8 @@ class Sketch_2 extends SketchTemplate {
         this.sketch.CONFIG = {
             BASE: 5,
             NUM_POINTS: 360,
-            C: 12
+            R: 12,
+            POINT_SCALE: 1
         };
         this.initControls();
 
@@ -61,8 +62,8 @@ class Sketch_2 extends SketchTemplate {
          --------------------------------------------*/
 
         this.sketch.setup = function () {
-            console.log('setup')
-            this.plotPoint(this.vCenter.x, this.vCenter.y, 10, 1, '#ff0000', '#0000ff');
+            console.log('setup');
+            this.plotPoint(this.vCenter.x, this.vCenter.y, 5, 1, '#ff0000', '#0000ff');
 
         };
 
@@ -80,7 +81,7 @@ class Sketch_2 extends SketchTemplate {
 
             for (var n = 1; n < this.CONFIG.NUM_POINTS; n++) {
 
-                let r = this.CONFIG.C * Math.sqrt(n);
+                let r = this.CONFIG.R * Math.sqrt(n);
                 let theta = this.fibonacciAngle * n * this.CONFIG.BASE;
                 let x = r * Math.cos(theta);
                 let y = r * Math.sin(theta);
@@ -99,7 +100,7 @@ class Sketch_2 extends SketchTemplate {
                 this.plotPoint(
                     this.vCenter.x + x,
                     this.vCenter.y + y,
-                    minPointSize + n / this.CONFIG.NUM_POINTS * maxPointSize,
+                    (minPointSize + n / this.CONFIG.NUM_POINTS * maxPointSize) * this.CONFIG.POINT_SCALE,
                     0,
                     chromatism.invert(color).hex,
                     chromatism.convert(color).hex
@@ -116,13 +117,16 @@ class Sketch_2 extends SketchTemplate {
 
     initControls() {
         this.gui = new dat.GUI({
-            width: 500,
+            width: 360,
             closed: false
         });
 
-        this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE').onChange(this.updateParams.bind(this));
-        this.gui.add(this.sketch.CONFIG, 'NUM_POINTS').min(0).max(720).step(1).name('NUM_POINTS').onChange(this.updateParams.bind(this));
-        this.gui.add(this.sketch.CONFIG, 'C').min(2).max(15).step(1).name('C').onChange(this.updateParams.bind(this));
+        //this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE').onChange(this.updateParams.bind(this));
+
+        this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE');
+        this.gui.add(this.sketch.CONFIG, 'NUM_POINTS').min(0).max(720).step(1).name('NUM_POINTS');
+        this.gui.add(this.sketch.CONFIG, 'R').min(0).max(36).step(.1).name('R');
+        this.gui.add(this.sketch.CONFIG, 'POINT_SCALE').min(0).max(2).step(.01).name('POINT_SCALE');
     }
 
     updateParams() {
