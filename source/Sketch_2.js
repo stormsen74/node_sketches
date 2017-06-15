@@ -12,61 +12,65 @@ import {Vector2} from "./math/vector2";
 
 class Sketch_2 extends SketchTemplate {
 
+    /*--------------------------------------------
+
+     φ = n * 137.5°
+     r = c * √n
+
+     n is the ordering number of a floret, counting outward from the
+     center. This is the reverse of floret age in a real plant
+
+     φ is the angle between a reference direction and the position vector
+     of the nth floret in a polar coordinate system originating at
+     the center of the capitulum. It follows that the divergence angle
+     between the position vectors of any two successive florets is
+     constant, α = 137.5°.
+
+     r is the distance between the center of the capitulum and the
+     center of the nth floret, given a constant scaling parameter c.
+
+     fibonacciAngle = 360 / (goldenRatio * goldenRatio);
+     --------------------------------------------*/
+
     constructor() {
-        super();
+        super(true, true);
 
         console.log('Sketch_2!');
 
-        //    φ = n * 137.5°
-        //    r = c * √n
+        /*--------------------------------------------
+         ~ sketch variables
+         --------------------------------------------*/
 
-        //n is the ordering number of a floret, counting outward from the
-        //center. This is the reverse of floret age in a real plant
+        this.sketch.goldenRatio = 1.61803398875;
+        this.sketch.fibonacciAngle = 137.5;
+        this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
 
-        //φ is the angle between a reference direction and the position vector
-        //of the nth floret in a polar coordinate system originating at
-        //the center of the capitulum. It follows that the divergence angle
-        //between the position vectors of any two successive florets is
-        //constant, α = 137.5°.
-
-        //r is the distance between the center of the capitulum and the
-        //center of the nth floret, given a constant scaling parameter c.
-
-        // fibonacciAngle = 360 / (goldenRatio * goldenRatio);
+        /*--------------------------------------------
+         ~ confif stuff / dat-gui
+         --------------------------------------------*/
 
         this.sketch.CONFIG = {
             BASE: 5,
             NUM_POINTS: 360,
             C: 12
         };
-
-        this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5)
-        this.sketch.vPlot = new Vector2(0, 0);
-        console.log(this.sketch.vCenter)
-
         this.initControls();
 
-        this.sketch.goldenRatio = 1.61803398875;
-        this.sketch.fibonacciAngle = 137.5;
-
+        /*--------------------------------------------
+         ~ sketch methods
+         --------------------------------------------*/
 
         this.sketch.setup = function () {
-
-            // console.log(QUARTER_PI)
-
-            // demo.plotPoint(vCenter.x, vCenter.y, 1, '#ff0000');
+            console.log('setup')
             this.plotPoint(this.vCenter.x, this.vCenter.y, 10, 1, '#ff0000', '#0000ff');
 
-            this.start();
         };
 
         this.sketch.mousedown = function () {
-            console.log('down')
-        }
-
+            this.start();
+        };
 
         this.sketch.mousemove = function () {
-
         };
 
         this.sketch.draw = function () {
@@ -105,6 +109,10 @@ class Sketch_2 extends SketchTemplate {
         };
 
     }
+
+    /*--------------------------------------------
+     ~ class methods
+     --------------------------------------------*/
 
     initControls() {
         this.gui = new dat.GUI({

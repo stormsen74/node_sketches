@@ -7,9 +7,12 @@ var Sketch = require('sketch-js');
 
 class SketchTemplate {
 
-    constructor() {
+    constructor(_autostart, _autoclear) {
 
-        console.log('SketchTemplate!');
+        let autostart = _autostart || false;
+        let autoclear = _autoclear || false;
+
+        console.log('SketchTemplate!', 'autostart: ', autostart, ' | autoclear: ', autoclear);
 
         // https://github.com/soulwire/sketch.js/wiki/API
 
@@ -17,10 +20,9 @@ class SketchTemplate {
             container: document.getElementById('screen'),
             interval: 1,
             retina: 'auto',
-            autostart: true,
-            autopause: false,
-            autoclear: true,
-            running: false
+            autopause: true,
+            autostart: autostart,
+            autoclear: autoclear
         });
 
         this.sketch.lineCap = 'round';
@@ -59,12 +61,10 @@ class SketchTemplate {
 
     start() {
         this.sketch.start();
-        this.sketch.running = true;
     }
 
     stop() {
         this.sketch.stop();
-        this.sketch.running = false;
     }
 }
 

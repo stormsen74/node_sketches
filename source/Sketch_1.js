@@ -11,9 +11,13 @@ import SketchTemplate from "./SketchTemplate.js";
 class Sketch_1 extends SketchTemplate {
 
     constructor() {
-        super();
+        super(true, false);
 
         console.log('Sketch_1!');
+
+        /*--------------------------------------------
+         ~ sketch variables
+         --------------------------------------------*/
 
         this.sketch.hue = 0;
         this.sketch.t = 0;
@@ -21,15 +25,10 @@ class Sketch_1 extends SketchTemplate {
 
 
         this.sketch.setup = function () {
-            // console.log(QUARTER_PI)
-
-            // this.lineCap = 'round';
-            // this.lineJoin = 'round';
         };
 
         this.sketch.mousedown = function () {
-            console.log('down')
-        }
+        };
 
 
         this.sketch.mousemove = function () {
@@ -59,10 +58,6 @@ class Sketch_1 extends SketchTemplate {
 
         };
 
-        this.sketch.draw = function () {
-            // this.fillStyle = `rgb(${~~this.r},${~~this.g},${~~this.b})`;
-            // this.fillRect(0, 0, this.width, this.height)
-        };
 
     }
 
