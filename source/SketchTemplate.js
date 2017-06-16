@@ -7,6 +7,7 @@ var Sketch = require('sketch-js');
 
 class SketchTemplate {
 
+
     constructor(_autostart, _autoclear) {
 
         let autostart = _autostart || false;
@@ -56,6 +57,17 @@ class SketchTemplate {
             }
         };
 
+        this.sketch.lineFromTo = function (vStart, vEnd) {
+
+            this.strokeStyle = '#ffffff';
+            this.lineWidth = .5;
+
+            this.moveTo(vStart.x, vStart.y);
+            this.lineTo(vEnd.x, vEnd.y);
+            this.stroke();
+
+        }
+
 
     }
 
@@ -65,6 +77,18 @@ class SketchTemplate {
 
     stop() {
         this.sketch.stop();
+    }
+
+    toggle() {
+        this.sketch.toggle();
+    }
+
+    clear() {
+        this.sketch.clear();
+    }
+
+    destroy() {
+        this.sketch.destroy();
     }
 }
 
