@@ -68,6 +68,27 @@ class SketchTemplate {
 
         }
 
+        this.sketch.line = function (x, y, a) {
+
+            let _a = a || 0;
+            let lineLength = 100;
+
+            this.strokeStyle = '#ffffff';
+            this.lineWidth = 2;
+
+            this.save();
+
+            this.translate(x, y);
+            this.rotate(_a);
+            this.beginPath();
+            this.moveTo(-lineLength * .5, 0);
+            this.lineTo(lineLength * .5, 0);
+            this.closePath();
+            this.stroke();
+
+            this.restore();
+        }
+
 
     }
 
