@@ -49,6 +49,7 @@ class Sketch_3 extends SketchTemplate {
             DRAW_OUT_LINES: true
         };
         this.initControls();
+        this.sketch.datContainer = document.getElementById('dat-container');
 
         /*--------------------------------------------
          ~ sketch methods
@@ -60,8 +61,6 @@ class Sketch_3 extends SketchTemplate {
         this.sketch.mousedown = function () {
         };
 
-        this.sketch.mousemove = function () {
-        };
 
         this.sketch.update = function () {
             this.stepLength = 2 * Math.PI / this.CONFIG.NUM_SAMPLES;
@@ -112,11 +111,19 @@ class Sketch_3 extends SketchTemplate {
      ~ class methods
      --------------------------------------------*/
 
+    clearControls () {
+        document.getElementById('dat-container').removeChild(this.gui.domElement);
+    }
+
+
     initControls() {
         this.gui = new dat.GUI({
             width: 360,
-            closed: false
+            closed: false,
+            autoPlace: false
         });
+
+        document.getElementById('dat-container').appendChild(this.gui.domElement);
 
         //this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE').onChange(this.updateParams.bind(this));
 

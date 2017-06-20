@@ -3,8 +3,6 @@
  */
 
 
-// var raf = require('raf')
-
 import Sketches from './Sketches';
 
 // http://www.2ality.com/

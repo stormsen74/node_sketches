@@ -3,25 +3,26 @@
  */
 
 var gsap = require('gsap');
-import Sketch_1 from "./Sketch_1.js";
 import Sketch_2 from "./Sketch_2.js";
 import Sketch_3 from "./Sketch_3.js";
 
 
 class Sketches {
 
+    var _scope;
 
     constructor() {
+
+        _scope = this;
         console.log('Sketches!');
 
-        var sketch = new Sketch_3();
 
-        // TweenMax.delayedCall(3, function () {
-        //     sketch.clear();
-        //     sketch.destroy();
-        //
-        //     sketch = new Sketch_2();
-        // })
+        // TODO Select / Sketch [Meta-Info) / Close Button x
+
+        this.sketch = new Sketch_3();
+
+        this.clearSketch();
+        this.sketch = new Sketch_2();
 
 
         //
@@ -30,6 +31,12 @@ class Sketches {
         // })
 
 
+    }
+
+    clearSketch() {
+        this.sketch.clearControls();
+        this.sketch.clear();
+        this.sketch.destroy();
     }
 
 }
