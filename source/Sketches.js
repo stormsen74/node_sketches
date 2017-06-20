@@ -9,11 +9,8 @@ import Sketch_3 from "./Sketch_3.js";
 
 class Sketches {
 
-    var _scope;
-
     constructor() {
 
-        _scope = this;
         console.log('Sketches!');
 
 
@@ -21,8 +18,8 @@ class Sketches {
 
         this.sketch = new Sketch_3();
 
-        this.clearSketch();
-        this.sketch = new Sketch_2();
+        TweenMax.delayedCall(3, this.clearSketch, null, this);
+        TweenMax.delayedCall(4, this.addSketch, [1], this, );
 
 
         //
@@ -37,6 +34,11 @@ class Sketches {
         this.sketch.clearControls();
         this.sketch.clear();
         this.sketch.destroy();
+    }
+
+    addSketch(id) {
+        console.log(id)
+        this.sketch = new Sketch_2();
     }
 
 }
