@@ -61,6 +61,14 @@ class Sketch_1 extends SketchTemplate {
 
     }
 
+    /*--------------------------------------------
+     ~ class methods
+     --------------------------------------------*/
+
+    kill () {
+        // document.getElementById('dat-container').removeChild(this.gui.domElement);
+    }
+
 
 }
 

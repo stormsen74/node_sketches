@@ -2,7 +2,8 @@
  * Created by STORMSEN on 29.11.2016.
  */
 
-var gsap = require('gsap');
+// var gsap = require('gsap');
+import Sketch_1 from "./Sketch_1.js";
 import Sketch_2 from "./Sketch_2.js";
 import Sketch_3 from "./Sketch_3.js";
 
@@ -13,33 +14,51 @@ class Sketches {
 
         console.log('Sketches!');
 
+        this.sketches = [
+            '',
+            Sketch_1,
+            Sketch_2,
+            Sketch_3
+        ];
 
-        // TODO Select / Sketch [Meta-Info) / Close Button x
+        this.select = document.getElementById('select');
+        this.closeButton = document.getElementById('close');
+        this.closeButton.addEventListener('click', this.onCloseSketch.bind(this));
 
-        this.sketch = new Sketch_3();
+        for (var i = 1; i < this.sketches.length; i++) {
+            let node = document.createElement('div');
+            node.classList.add('select_box');
+            node.innerHTML = 'sketch | ' + i;
+            node._id = i;
+            node.addEventListener('click', this.onSelectSketch.bind(this));
+            this.select.appendChild(node);
+        }
 
-        TweenMax.delayedCall(3, this.clearSketch, null, this);
-        TweenMax.delayedCall(4, this.addSketch, [1], this, );
 
+        // TODO => Sketch [Meta-Info) / Styling
 
-        //
-        // TweenMax.delayedCall(6, function () {
-        //     sketch.stop();
-        // })
+        // TweenMax.delayedCall(3, this.closeSketch, null, this);
 
 
     }
 
-    clearSketch() {
-        this.sketch.clearControls();
+    onSelectSketch(e) {
+        console.log(e.target._id)
+        this.sketch = new this.sketches[e.target._id]();
+
+        this.select.style.display = 'none';
+        this.closeButton.style.display = 'block'
+    }
+
+    onCloseSketch(e) {
+        this.sketch.kill();
         this.sketch.clear();
         this.sketch.destroy();
+
+        this.select.style.display = 'block';
+        this.closeButton.style.display = 'none'
     }
 
-    addSketch(id) {
-        console.log(id)
-        this.sketch = new Sketch_2();
-    }
 
 }
 

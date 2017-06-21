@@ -115,11 +115,17 @@ class Sketch_2 extends SketchTemplate {
      ~ class methods
      --------------------------------------------*/
 
+    kill () {
+        document.getElementById('dat-container').removeChild(this.gui.domElement);
+    }
+
     initControls() {
         this.gui = new dat.GUI({
             width: 360,
             closed: false
         });
+
+        document.getElementById('dat-container').appendChild(this.gui.domElement);
 
         //this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE').onChange(this.updateParams.bind(this));
 

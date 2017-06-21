@@ -111,7 +111,7 @@ class Sketch_3 extends SketchTemplate {
      ~ class methods
      --------------------------------------------*/
 
-    clearControls () {
+    kill () {
         document.getElementById('dat-container').removeChild(this.gui.domElement);
     }
 
