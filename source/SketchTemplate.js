@@ -29,6 +29,8 @@ class SketchTemplate {
         this.sketch.lineCap = 'round';
         this.sketch.lineJoin = 'round';
 
+        this.sketch.globalCompositeOperation = 'lighter';
+
 
         this.sketch.setup = function () {
         };
