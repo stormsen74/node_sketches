@@ -7,6 +7,7 @@
 var chromatism = require('chromatism');
 
 import SketchTemplate from "./SketchTemplate.js";
+import {Vector2} from "./math/vector2";
 
 class Sketch_1 extends SketchTemplate {
 
@@ -23,13 +24,18 @@ class Sketch_1 extends SketchTemplate {
         this.sketch.t = 0;
         this.sketch.delta = .01;
         this.sketch.mouseIsDown = false;
+        this.sketch.vTarget = new Vector2(0, this.sketch.height * .5);
 
         /*--------------------------------------------
          ~ confif stuff / dat-gui
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
-            BASE: 3,
+            VEL_X: 1.5,
+            AMP: 150,
+            FREQ: 3,
+            dT: .01,
+            TARGET: false,
             METHODS: {
                 clear: function () {
                 }
@@ -39,7 +45,9 @@ class Sketch_1 extends SketchTemplate {
 
 
         this.sketch.setup = function () {
+            //this.sketch.globalCompositeOperation = 'lighter';
         };
+        this.sketch.setup();
 
         this.sketch.mousedown = function () {
             this._mx = this.mouse.x;
@@ -49,6 +57,39 @@ class Sketch_1 extends SketchTemplate {
 
         this.sketch.mouseup = function () {
             this.mouseIsDown = false;
+        };
+
+        this.sketch.update = function () {
+            if (this.vTarget.x > this.width) {
+                this.clear();
+                this.vTarget.x = 0;
+
+                this._mx = this.vTarget.x;
+                this._my = this.vTarget.y;
+
+            }
+            this.vTarget.x += this.CONFIG.VEL_X;
+            this.t += this.CONFIG.dT;
+            this.vTarget.y = this.height * .5 + this.CONFIG.AMP * sin(this.CONFIG.FREQ * this.t);
+
+
+            this.hue = this.hue < 359 ? this.hue += 1 : 0;
+            let s = 60;
+            let l = 50;
+            let color = ({h: this.hue, s: s, l: l});
+            this.strokeStyle = chromatism.convert(color).hex;
+
+            let w = 1 + abs(sin(this.t) * 10);
+            //this.lineWidth = w;
+
+            this.beginPath();
+            this.moveTo(this._mx, this._my);
+            this.lineTo(this.vTarget.x, this.vTarget.y);
+            this.closePath();
+            this.stroke();
+
+            this._mx = this.vTarget.x;
+            this._my = this.vTarget.y;
         };
 
 
@@ -90,13 +131,6 @@ class Sketch_1 extends SketchTemplate {
         document.getElementById('dat-container').removeChild(this.gui.domElement);
     }
 
-    clear() {
-        this.sketch.clear();
-    }
-
-    updateParams() {
-
-    }
 
     initControls() {
         this.gui = new dat.GUI({
@@ -107,13 +141,18 @@ class Sketch_1 extends SketchTemplate {
 
         document.getElementById('dat-container').appendChild(this.gui.domElement);
 
-
+        this.gui.add(this.sketch.CONFIG, 'VEL_X').min(0).max(5).step(.01).name('VEL_X');
+        this.gui.add(this.sketch.CONFIG, 'FREQ').min(0).max(100).step(.01).name('FREQ');
+        this.gui.add(this.sketch.CONFIG, 'AMP').min(0).max(300).step(1).name('AMP');
+        this.gui.add(this.sketch.CONFIG, 'dT').min(0).max(2).step(.01).name('dT');
         this.gui.add(this.sketch.CONFIG.METHODS, 'clear').onChange(this.clear.bind(this));
 
     }
 
 
+    updateParams() {
 
+    }
 
 
 }
