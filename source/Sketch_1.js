@@ -22,13 +22,18 @@ class Sketch_1 extends SketchTemplate {
         this.sketch.hue = 0;
         this.sketch.t = 0;
         this.sketch.delta = .01;
+        this.sketch.mouseIsDown = false;
 
         /*--------------------------------------------
          ~ confif stuff / dat-gui
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
-            BASE: 3
+            BASE: 3,
+            METHODS: {
+                clear: function () {
+                }
+            }
         }
         this.initControls();
 
@@ -37,12 +42,19 @@ class Sketch_1 extends SketchTemplate {
         };
 
         this.sketch.mousedown = function () {
+            this._mx = this.mouse.x;
+            this._my = this.mouse.y;
+            this.mouseIsDown = true;
+        };
+
+        this.sketch.mouseup = function () {
+            this.mouseIsDown = false;
         };
 
 
         this.sketch.mousemove = function () {
 
-            if (this.running) {
+            if (this.running && this.mouseIsDown) {
 
                 this.hue = this.hue < 359 ? this.hue += 1 : 0;
                 let s = 60;
@@ -78,6 +90,13 @@ class Sketch_1 extends SketchTemplate {
         document.getElementById('dat-container').removeChild(this.gui.domElement);
     }
 
+    clear() {
+        this.sketch.clear();
+    }
+
+    updateParams() {
+
+    }
 
     initControls() {
         this.gui = new dat.GUI({
@@ -88,17 +107,13 @@ class Sketch_1 extends SketchTemplate {
 
         document.getElementById('dat-container').appendChild(this.gui.domElement);
 
-        this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE').onChange(this.updateParams.bind(this));
+
+        this.gui.add(this.sketch.CONFIG.METHODS, 'clear').onChange(this.clear.bind(this));
 
     }
 
-    clear() {
-        console.log('clear')
-    }
 
-    updateParams() {
 
-    }
 
 
 }
