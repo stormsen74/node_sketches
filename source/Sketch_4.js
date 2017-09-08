@@ -5,8 +5,10 @@
 
 // var Sketch = require('sketch-js');
 var chromatism = require('chromatism');
+var gsap = require('gsap');
 
 import SketchTemplate from "./SketchTemplate.js";
+import MathUtils from "./utils/mathUtils";
 import {Vector2} from "./math/vector2";
 
 class Sketch_4 extends SketchTemplate {
@@ -21,14 +23,10 @@ class Sketch_4 extends SketchTemplate {
          --------------------------------------------*/
 
         this.sketch.points = [];
-        this.sketch.initialPoints = 6;
-        this.sketch.scaleFactor = .6;
-        this.sketch.radius = this.sketch.height / 4;
+        this.sketch.iterateStep = 0;
         this.sketch.angle = 0;
-        this.sketch.offset = this.sketch.height / 6;
         this.sketch.mouseIsDown = false;
 
-        //this.t = 0;
         this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
 
         /*--------------------------------------------
@@ -36,32 +34,63 @@ class Sketch_4 extends SketchTemplate {
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
-            initialPoints: 8,
+            initialPoints: 6,
+            radius: this.sketch.height / 4,
             scaleFactor: .6,
+            initialOffset: this.sketch.height / 6,
+            maxSteps: 8,
+            iterateStep: '0',
+            color: {r: 50, g: 180, b: 200},
             METHODS: {
                 reset: function () {
+                },
+                autoStep: function () {
                 }
             }
-        }
+        };
         this.initControls();
 
 
         this.sketch.mousedown = function () {
-
             this.mouseIsDown = true;
-
-            this.iterate();
-            this.drawCoast();
+            this.step();
         };
 
         this.sketch.mouseup = function () {
             this.mouseIsDown = false;
         };
 
-        this.sketch.drawCoast = function () {
-            // this.clear();
-            this.fillStyle = "rgba(255,255,255,0.05)";
-            this.fillRect(0, 0, this.width, this.height);
+        this.sketch.autoStep = function () {
+            for (var i = this.iterateStep; i < this.CONFIG.maxSteps; i++) {
+                autoStep(this, i);
+            }
+
+            function autoStep(_scope, i) {
+                TweenMax.delayedCall(i * .1, function () {
+                    _scope.step();
+                })
+            }
+        };
+
+
+        this.sketch.step = function () {
+            if (this.iterateStep < this.CONFIG.maxSteps) {
+
+                if (this.iterateStep == 0) this.clear();
+                this.iterate();
+
+                // this.clear();
+
+                let color = chromatism.brightness(MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [0, -20]), this.CONFIG.color).rgb;
+                this.fillStyle = 'rgba(' + ~~color.r + ',' + ~~color.g + ',' + ~~color.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
+                this.filter = 'blur(' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [20, 0]) + 'px)';
+
+                this.stepDraw();
+            }
+        };
+
+
+        this.sketch.stepDraw = function () {
 
             this.save();
             this.translate(this.width / 2, this.height / 2);
@@ -72,6 +101,7 @@ class Sketch_4 extends SketchTemplate {
             }
             this.fill();
             this.restore();
+
         };
 
         this.sketch.iterate = function () {
@@ -91,54 +121,50 @@ class Sketch_4 extends SketchTemplate {
             newPoints.push(this.points[this.points.length - 1]);
             this.points = newPoints;
             this.offset *= this.CONFIG.scaleFactor;
+            this.iterateStep += 1;
+            this.CONFIG.iterateStep = this.iterateStep.toString();
         };
 
 
         this.sketch.update = function () {
-
-            // this.drawPolar();
-
         };
 
         this.sketch.draw = function () {
-            // this.fillStyle = "rgba(38,38,38,0.05)";
-            // this.fillRect(0, 0, this.width, this.height);
-        }
-
+        };
 
         this.sketch.mousemove = function () {
-
-            if (this.running && this.mouseIsDown) {
-
-
-            }
-
-
         };
 
         this.sketch.setup = function () {
             this.globalCompositeOperation = 'lighter';
             this.fillStyle = "#ffffff";
-            for (var i = 0; i < this.initialPoints; i += 1) {
-                let angle = Math.PI * 2 / this.initialPoints * i;
+
+            this.points = [];
+            this.offset = this.CONFIG.initialOffset;
+            this.iterateStep = 0;
+
+            for (var i = 0; i < this.CONFIG.initialPoints; i += 1) {
+                let angle = Math.PI * 2 / this.CONFIG.initialPoints * i;
                 this.points.push({
-                    x: cos(angle) * this.radius,
-                    y: sin(angle) * this.radius
+                    x: cos(angle) * this.CONFIG.radius,
+                    y: sin(angle) * this.CONFIG.radius
                 });
             }
 
             this.points.push(this.points[0]);
 
-            this.drawCoast();
+            this.stepDraw();
 
         };
+
+
+        this.sketch.reset = function () {
+            this.clear();
+            this.fillStyle = "#ffffff";
+            this.setup();
+        };
+
         this.sketch.setup();
-
-        this.sketch.reset = function() {
-            console.log('R')
-        }
-
-
 
     }
 
@@ -160,14 +186,28 @@ class Sketch_4 extends SketchTemplate {
 
         document.getElementById('dat-container').appendChild(this.gui.domElement);
 
+        this.gui.add(this.sketch.CONFIG, 'initialPoints').min(3).max(12).step(1).name('initialPoints').onChange(this.setup.bind(this));
+        this.gui.add(this.sketch.CONFIG, 'radius').min(1).max(this.sketch.height).step(1).name('radius').onChange(this.setup.bind(this));
+        this.gui.add(this.sketch.CONFIG, 'initialOffset').min(.01).max(this.sketch.height).step(1).name('initialOffset');
         this.gui.add(this.sketch.CONFIG, 'scaleFactor').min(.01).max(1.0).step(.01).name('scaleFactor');
+        this.gui.add(this.sketch.CONFIG, 'maxSteps').min(1).max(10).step(1).name('maxSteps');
+        this.gui.addColor(this.sketch.CONFIG, 'color').name('color').listen();
+        this.gui.add(this.sketch.CONFIG, 'iterateStep').name('iterateStep').listen();
+        this.gui.add(this.sketch.CONFIG.METHODS, 'autoStep').onChange(this.autoStep.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
 
     }
 
+    setup() {
+        this.sketch.clear();
+        this.sketch.setup();
+    }
+
+    autoStep() {
+        this.sketch.autoStep();
+    }
 
     reset() {
-        console.log('reset');
         this.sketch.reset();
     }
 
