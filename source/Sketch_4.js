@@ -27,7 +27,14 @@ class Sketch_4 extends SketchTemplate {
         this.sketch.angle = 0;
         this.sketch.mouseIsDown = false;
 
-        this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
+        this.sketch.vT = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
+        this.sketch.vT.add(new Vector2(-this.sketch.width * .2, 0));
+
+        this.sketch.colors = [
+            {r: 50, g: 180, b: 200},
+            {r: 200, g: 138, b: 50}
+        ];
+
 
         /*--------------------------------------------
          ~ confif stuff / dat-gui
@@ -40,7 +47,7 @@ class Sketch_4 extends SketchTemplate {
             initialOffset: this.sketch.height / 6,
             maxSteps: 8,
             iterateStep: '0',
-            color: {r: 50, g: 180, b: 200},
+            color: this.sketch.colors[0],
             METHODS: {
                 reset: function () {
                 },
@@ -77,13 +84,16 @@ class Sketch_4 extends SketchTemplate {
             if (this.iterateStep < this.CONFIG.maxSteps) {
 
                 if (this.iterateStep == 0) this.clear();
+
+                this.fillStyle = 'rgba(' + ~~this.palette[this.iterateStep].r + ',' + ~~this.palette[this.iterateStep].g + ',' + ~~this.palette[this.iterateStep].b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.3, .95]) + ')';
+
                 this.iterate();
 
                 // this.clear();
 
-                let color = chromatism.brightness(MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [0, -20]), this.CONFIG.color).rgb;
-                this.fillStyle = 'rgba(' + ~~color.r + ',' + ~~color.g + ',' + ~~color.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
-                this.filter = 'blur(' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [20, 0]) + 'px)';
+                //let color = chromatism.brightness(MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [0, -20]), this.CONFIG.color).rgb;
+                //this.fillStyle = 'rgba(' + ~~color.r + ',' + ~~color.g + ',' + ~~color.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
+                this.filter = 'blur(' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [30, 0]) + 'px)';
 
                 this.stepDraw();
             }
@@ -93,7 +103,8 @@ class Sketch_4 extends SketchTemplate {
         this.sketch.stepDraw = function () {
 
             this.save();
-            this.translate(this.width / 2, this.height / 2);
+            //this.translate(this.width / 2, this.height / 2);
+            this.translate(this.vT.x, this.vT.y);
             this.beginPath();
             this.moveTo(this.points[0].x, this.points[0].y);
             for (var i = 1; i < this.points.length; i += 1) {
@@ -142,6 +153,11 @@ class Sketch_4 extends SketchTemplate {
             this.points = [];
             this.offset = this.CONFIG.initialOffset;
             this.iterateStep = 0;
+            this.palette = chromatism.fade(this.CONFIG.maxSteps, this.colors[0], this.colors[1]).rgb;
+            this.palette.forEach((color, index) => {
+                let _c = this.palette[index];
+                this.palette[index] = chromatism.brightness(-25, _c).rgb;
+            });
 
             for (var i = 0; i < this.CONFIG.initialPoints; i += 1) {
                 let angle = Math.PI * 2 / this.CONFIG.initialPoints * i;
