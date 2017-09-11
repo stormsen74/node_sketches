@@ -85,14 +85,15 @@ class Sketch_4 extends SketchTemplate {
 
                 if (this.iterateStep == 0) this.clear();
 
-                this.fillStyle = 'rgba(' + ~~this.palette[this.iterateStep].r + ',' + ~~this.palette[this.iterateStep].g + ',' + ~~this.palette[this.iterateStep].b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.3, .95]) + ')';
+                // this.fillStyle = 'rgba(' + ~~this.palette[this.iterateStep].r + ',' + ~~this.palette[this.iterateStep].g + ',' + ~~this.palette[this.iterateStep].b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.3, .95]) + ')';
+
+                let color = chromatism.brightness(MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [0, -20]), this.colors[1]).rgb;
+                this.fillStyle = 'rgba(' + ~~color.r + ',' + ~~color.g + ',' + ~~color.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
 
                 this.iterate();
 
                 // this.clear();
 
-                //let color = chromatism.brightness(MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [0, -20]), this.CONFIG.color).rgb;
-                //this.fillStyle = 'rgba(' + ~~color.r + ',' + ~~color.g + ',' + ~~color.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
                 this.filter = 'blur(' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [30, 0]) + 'px)';
 
                 this.stepDraw();

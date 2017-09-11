@@ -2,7 +2,7 @@
  * Created by STORMSEN on 29.11.2016.
  */
 
-// var gsap = require('gsap');
+var gsap = require('gsap');
 import Sketch_1 from "./Sketch_1.js";
 import Sketch_2 from "./Sketch_2.js";
 import Sketch_3 from "./Sketch_3.js";
@@ -15,6 +15,8 @@ class Sketches {
 
         console.log('Sketches!');
 
+
+
         this.sketches = [
             '',
             Sketch_1,
@@ -23,6 +25,12 @@ class Sketches {
             Sketch_4
         ];
 
+
+        // DEVELOP
+        // this.sketch = new this.sketches[3]();
+        // return;
+
+
         this.select = document.getElementById('select');
         this.closeButton = document.getElementById('close');
         this.closeButton.addEventListener('click', this.onCloseSketch.bind(this));
@@ -30,6 +38,7 @@ class Sketches {
         for (var i = 1; i < this.sketches.length; i++) {
             let node = document.createElement('div');
             node.classList.add('select_box');
+            node.style.background = 'im'
             node.innerHTML = 'sketch | ' + i;
             node._id = i;
             node.addEventListener('click', this.onSelectSketch.bind(this));
@@ -38,9 +47,6 @@ class Sketches {
 
 
         // TODO => Sketch [Meta-Info) / Styling
-
-        // TweenMax.delayedCall(3, this.closeSketch, null, this);
-
 
     }
 
