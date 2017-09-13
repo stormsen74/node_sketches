@@ -7,4 +7,18 @@ body {
 }
 
 
+.select_box {
+    width: 200px;
+    height: 200px;
+    background-color: #5d6773;
+    float: left;
+    outline: 1px solid #ffffff;
+    outline-offset: -1px;
+    margin: 5px 2.5px 2.5px 5px;
+    cursor: pointer;
+    background: url("assets/sketch_thumbs/thumb_2.png");
+    /*background-color: #2b2b2b;*/
+}
+
+
 

@@ -16,7 +16,6 @@ class Sketches {
         console.log('Sketches!');
 
 
-
         this.sketches = [
             '',
             Sketch_1,
@@ -38,7 +37,8 @@ class Sketches {
         for (var i = 1; i < this.sketches.length; i++) {
             let node = document.createElement('div');
             node.classList.add('select_box');
-            node.style.background = 'im'
+            //node.style.background = 'url("assets/sketch_thumbs/thumb_1.jpg")';
+            node.style.backgroundColor = '#2b2b2b';
             node.innerHTML = 'sketch | ' + i;
             node._id = i;
             node.addEventListener('click', this.onSelectSketch.bind(this));

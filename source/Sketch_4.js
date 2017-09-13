@@ -52,6 +52,8 @@ class Sketch_4 extends SketchTemplate {
                 reset: function () {
                 },
                 autoStep: function () {
+                },
+                newFrac: function() {
                 }
             }
         };
@@ -83,7 +85,7 @@ class Sketch_4 extends SketchTemplate {
         this.sketch.step = function () {
             if (this.iterateStep < this.CONFIG.maxSteps) {
 
-                if (this.iterateStep == 0) this.clear();
+                //if (this.iterateStep == 0) this.clear();
 
                 // this.fillStyle = 'rgba(' + ~~this.palette[this.iterateStep].r + ',' + ~~this.palette[this.iterateStep].g + ',' + ~~this.palette[this.iterateStep].b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.3, .95]) + ')';
 
@@ -170,7 +172,7 @@ class Sketch_4 extends SketchTemplate {
 
             this.points.push(this.points[0]);
 
-            this.stepDraw();
+            //this.stepDraw();
 
         };
 
@@ -210,13 +212,18 @@ class Sketch_4 extends SketchTemplate {
         this.gui.add(this.sketch.CONFIG, 'maxSteps').min(1).max(10).step(1).name('maxSteps');
         this.gui.addColor(this.sketch.CONFIG, 'color').name('color').listen();
         this.gui.add(this.sketch.CONFIG, 'iterateStep').name('iterateStep').listen();
+        this.gui.add(this.sketch.CONFIG.METHODS, 'newFrac').onChange(this.newFrac.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'autoStep').onChange(this.autoStep.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
 
     }
 
     setup() {
-        this.sketch.clear();
+        //this.sketch.clear();
+        this.sketch.setup();
+    }
+
+    newFrac() {
         this.sketch.setup();
     }
 
