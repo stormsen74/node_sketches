@@ -23,6 +23,7 @@ class Sketch_4 extends SketchTemplate {
          --------------------------------------------*/
 
         this.sketch.points = [];
+        this.sketch.fracStep = 0;
         this.sketch.iterateStep = 0;
         this.sketch.angle = 0;
         this.sketch.mouseIsDown = false;
@@ -47,13 +48,14 @@ class Sketch_4 extends SketchTemplate {
             initialOffset: this.sketch.height / 6,
             maxSteps: 8,
             iterateStep: '0',
+            fragStep: '0',
             color: this.sketch.colors[0],
             METHODS: {
                 reset: function () {
                 },
                 autoStep: function () {
                 },
-                newFrac: function() {
+                newFrac: function () {
                 }
             }
         };
@@ -119,6 +121,10 @@ class Sketch_4 extends SketchTemplate {
         };
 
         this.sketch.iterate = function () {
+            this.CONFIG.fracStep = '3';
+            if (this.fracStep == 0 && this.iterateStep == 0) {
+                this.clear();
+            }
             var newPoints = [];
             for (var i = 0; i < this.points.length - 1; i += 1) {
                 var p0 = this.points[i],
@@ -155,7 +161,10 @@ class Sketch_4 extends SketchTemplate {
 
             this.points = [];
             this.offset = this.CONFIG.initialOffset;
+
             this.iterateStep = 0;
+            this.CONFIG.iterateStep = this.iterateStep.toString();
+
             this.palette = chromatism.fade(this.CONFIG.maxSteps, this.colors[0], this.colors[1]).rgb;
             this.palette.forEach((color, index) => {
                 let _c = this.palette[index];
@@ -172,7 +181,9 @@ class Sketch_4 extends SketchTemplate {
 
             this.points.push(this.points[0]);
 
-            //this.stepDraw();
+            if (this.fracStep == 0) {
+                this.stepDraw();
+            }
 
         };
 
@@ -212,6 +223,7 @@ class Sketch_4 extends SketchTemplate {
         this.gui.add(this.sketch.CONFIG, 'maxSteps').min(1).max(10).step(1).name('maxSteps');
         this.gui.addColor(this.sketch.CONFIG, 'color').name('color').listen();
         this.gui.add(this.sketch.CONFIG, 'iterateStep').name('iterateStep').listen();
+        this.gui.add(this.sketch.CONFIG, 'fragStep').name('fragStep').listen();
         this.gui.add(this.sketch.CONFIG.METHODS, 'newFrac').onChange(this.newFrac.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'autoStep').onChange(this.autoStep.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
@@ -224,6 +236,7 @@ class Sketch_4 extends SketchTemplate {
     }
 
     newFrac() {
+        this.sketch.fracStep += 1;
         this.sketch.setup();
     }
 
