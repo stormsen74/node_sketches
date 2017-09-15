@@ -23,8 +23,8 @@ class Sketch_4 extends SketchTemplate {
          --------------------------------------------*/
 
         this.sketch.points = [];
-        this.sketch.fracStep = 0;
         this.sketch.iterateStep = 0;
+        this.sketch.fracStep = 0;
         this.sketch.angle = 0;
         this.sketch.mouseIsDown = false;
 
@@ -47,8 +47,8 @@ class Sketch_4 extends SketchTemplate {
             scaleFactor: .6,
             initialOffset: this.sketch.height / 6,
             maxSteps: 8,
-            iterateStep: '0',
-            fragStep: '0',
+            iterateStep: 0,
+            fragStep: 0,
             color: this.sketch.colors[0],
             METHODS: {
                 reset: function () {
@@ -92,7 +92,8 @@ class Sketch_4 extends SketchTemplate {
                 // this.fillStyle = 'rgba(' + ~~this.palette[this.iterateStep].r + ',' + ~~this.palette[this.iterateStep].g + ',' + ~~this.palette[this.iterateStep].b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.3, .95]) + ')';
 
                 let color = chromatism.brightness(MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [0, -20]), this.colors[1]).rgb;
-                this.fillStyle = 'rgba(' + ~~color.r + ',' + ~~color.g + ',' + ~~color.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
+                let newColor = chromatism.brightness(MathUtils.convertToRange(this.fracStep, [0, 5], [-25, 0]), color).rgb;
+                this.fillStyle = 'rgba(' + ~~newColor.r + ',' + ~~newColor.g + ',' + ~~newColor.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
 
                 this.iterate();
 
@@ -121,7 +122,7 @@ class Sketch_4 extends SketchTemplate {
         };
 
         this.sketch.iterate = function () {
-            this.CONFIG.fracStep = '3';
+
             if (this.fracStep == 0 && this.iterateStep == 0) {
                 this.clear();
             }
@@ -142,7 +143,7 @@ class Sketch_4 extends SketchTemplate {
             this.points = newPoints;
             this.offset *= this.CONFIG.scaleFactor;
             this.iterateStep += 1;
-            this.CONFIG.iterateStep = this.iterateStep.toString();
+            this.CONFIG.iterateStep = this.iterateStep;
         };
 
 
@@ -163,7 +164,8 @@ class Sketch_4 extends SketchTemplate {
             this.offset = this.CONFIG.initialOffset;
 
             this.iterateStep = 0;
-            this.CONFIG.iterateStep = this.iterateStep.toString();
+            this.CONFIG.iterateStep = this.iterateStep;
+
 
             this.palette = chromatism.fade(this.CONFIG.maxSteps, this.colors[0], this.colors[1]).rgb;
             this.palette.forEach((color, index) => {
@@ -182,6 +184,7 @@ class Sketch_4 extends SketchTemplate {
             this.points.push(this.points[0]);
 
             if (this.fracStep == 0) {
+                this.clear();
                 this.stepDraw();
             }
 
@@ -191,6 +194,8 @@ class Sketch_4 extends SketchTemplate {
         this.sketch.reset = function () {
             this.clear();
             this.fillStyle = "#ffffff";
+            this.fracStep = 0;
+            this.CONFIG.fragStep = this.fracStep;
             this.setup();
         };
 
@@ -237,6 +242,7 @@ class Sketch_4 extends SketchTemplate {
 
     newFrac() {
         this.sketch.fracStep += 1;
+        this.sketch.CONFIG.fragStep = this.sketch.fracStep;
         this.sketch.setup();
     }
 

@@ -53,7 +53,11 @@ class Sketch_2 extends SketchTemplate {
             BASE: 5,
             NUM_POINTS: 360,
             R: 12,
-            POINT_SCALE: 1
+            POINT_SCALE: 1,
+            METHODS: {
+                save: function () {
+                }
+            }
         };
         this.initControls();
 
@@ -133,10 +137,15 @@ class Sketch_2 extends SketchTemplate {
         this.gui.add(this.sketch.CONFIG, 'NUM_POINTS').min(0).max(720).step(1).name('NUM_POINTS');
         this.gui.add(this.sketch.CONFIG, 'R').min(0).max(36).step(.1).name('R');
         this.gui.add(this.sketch.CONFIG, 'POINT_SCALE').min(0).max(2).step(.01).name('POINT_SCALE');
+        this.gui.add(this.sketch.CONFIG.METHODS, 'save').onChange(this.save.bind(this));
     }
 
     updateParams() {
 
+    }
+
+    save() {
+        console.log('sacve');
     }
 
 
