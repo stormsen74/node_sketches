@@ -26,8 +26,8 @@ class Sketch_5 extends SketchTemplate {
         this.sketch.iterateStep = 0;
         this.sketch.mouseIsDown = false;
 
-        this.sketch.vT = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
-        this.sketch.vT.add(new Vector2(-this.sketch.width * .2, 0));
+        this.sketch.vFp = new Vector2(this.sketch.width * .5, 0);
+        this.sketch.vFn = new Vector2(this.sketch.width * .5, this.sketch.height - 50);
 
         this.sketch.colors = [
             {r: 50, g: 180, b: 200},
@@ -36,7 +36,7 @@ class Sketch_5 extends SketchTemplate {
 
 
         /*--------------------------------------------
-         ~ config stuff / dat-gui
+         ~ dom-stuff
          --------------------------------------------*/
 
         let screen = document.getElementById('screen');
@@ -61,17 +61,13 @@ class Sketch_5 extends SketchTemplate {
             onDrag: this.dragUpdate.bind(this)
         });
 
-        let rsx = random() * this.sketch.width;
-        let rsy = 0;
-        let rex = random() * this.sketch.width;
-        let rey = this.sketch.height - 50;
-        TweenLite.set("#pStart", {x: rsx, y: rsy});
-        TweenLite.set("#pEnd", {x: rex, y: rey});
+        TweenLite.set("#pStart", {x: this.sketch.vFp.x, y: this.sketch.vFp.y});
+        TweenLite.set("#pEnd", {x: this.sketch.vFn.x, y: this.sketch.vFn.y});
 
-        this.sketch._pstart[0].x = rsx;
-        this.sketch._pstart[0].y = rsy;
-        this.sketch._pend[0].x = rex;
-        this.sketch._pend[0].y = rey;
+        this.sketch._pstart[0].x = this.sketch.vFp.x;
+        this.sketch._pstart[0].y = this.sketch.vFp.y;
+        this.sketch._pend[0].x = this.sketch.vFn.x;
+        this.sketch._pend[0].y = this.sketch.vFn.y;
 
 
         /*--------------------------------------------
@@ -107,12 +103,13 @@ class Sketch_5 extends SketchTemplate {
 
 
         this.sketch.autoStep = function () {
-            console.log(this._pstart[0].x)
-            this.points[0].x = this._pstart[0].x + 25;
-            this.points[0].y = this._pstart[0].y + 25;
+            //console.log(this._pstart[0].x)
 
-            this.points[1].x = this._pend[0].x + 25;
-            this.points[1].y = this._pend[0].y + 25;
+            this.points[0].x = this.vFp.x + 25;
+            this.points[0].y = this.vFp.y + 25;
+
+            this.points[1].x = this.vFn.x + 25;
+            this.points[1].y = this.vFn.y + 25;
 
             for (var i = this.iterateStep; i < this.CONFIG.maxSteps; i++) {
                 this.iterate();
@@ -125,10 +122,11 @@ class Sketch_5 extends SketchTemplate {
 
         this.sketch.drawFlash = function () {
 
-            console.log('draw')
+            console.log('draw');
 
+            this.clear();
+            //this.clear("black");
 
-            this.clear("black");
             this.strokeStyle = "rgb(220, 200, 255)";
             this.lineWidth = 4;
             this.shadowColor = "rgb(255, 255, 255)";
@@ -279,7 +277,17 @@ class Sketch_5 extends SketchTemplate {
     }
 
     dragUpdate() {
-        // console.log(this.sketch._pstart[0].x)
+         //console.log(this.sketch._pstart[0].x)
+        this.sketch.vFp.x = this.sketch._pstart[0].x;
+        this.sketch.vFp.y = this.sketch._pstart[0].y;
+
+        this.sketch.vFn.x = this.sketch._pend[0].x;
+        this.sketch.vFn.y = this.sketch._pend[0].y;
+
+        this.sketch.clear();
+        this.sketch.reset();
+        this.sketch.autoStep();
+
         // this.sketch.updateDrag();
     }
 
