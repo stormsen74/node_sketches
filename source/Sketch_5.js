@@ -8,15 +8,15 @@ var chromatism = require('chromatism');
 var gsap = require('gsap');
 
 import SketchTemplate from "./SketchTemplate.js";
-import MathUtils from "./utils/mathUtils";
 import {Vector2} from "./math/vector2";
+import Draggable from "gsap/Draggable";
 
-class Sketch_4 extends SketchTemplate {
+class Sketch_5 extends SketchTemplate {
 
     constructor() {
         super(false, false);
 
-        console.log('Sketch_4!');
+        console.log('Sketch_5!');
 
         /*--------------------------------------------
          ~ sketch variables
@@ -24,8 +24,6 @@ class Sketch_4 extends SketchTemplate {
 
         this.sketch.points = [];
         this.sketch.iterateStep = 0;
-        this.sketch.fracStep = 0;
-        this.sketch.angle = 0;
         this.sketch.mouseIsDown = false;
 
         this.sketch.vT = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
@@ -38,17 +36,53 @@ class Sketch_4 extends SketchTemplate {
 
 
         /*--------------------------------------------
-         ~ confif stuff / dat-gui
+         ~ config stuff / dat-gui
+         --------------------------------------------*/
+
+        let screen = document.getElementById('screen');
+
+        this.sketch.pStart = document.createElement('div');
+        this.sketch.pStart.classList.add('pStart');
+        this.sketch.pStart.id = 'pStart';
+        screen.appendChild(this.sketch.pStart);
+        this.sketch._pstart = Draggable.create(this.sketch.pStart, {
+            type: "x,y", edgeResistance: 0.5, bounds: "#screen", throwProps: false,
+            onDrag: this.dragUpdate.bind(this)
+        });
+
+
+        this.sketch.pEnd = document.createElement('div');
+        this.sketch.pEnd.classList.add('pEnd');
+        this.sketch.pEnd.id = 'pEnd';
+        screen.appendChild(this.sketch.pEnd);
+
+        this.sketch._pend = Draggable.create(this.sketch.pEnd, {
+            type: "x,y", edgeResistance: 0.5, bounds: "#screen", throwProps: false,
+            onDrag: this.dragUpdate.bind(this)
+        });
+
+        let rsx = random() * this.sketch.width;
+        let rsy = 0;
+        let rex = random() * this.sketch.width;
+        let rey = this.sketch.height - 50;
+        TweenLite.set("#pStart", {x: rsx, y: rsy});
+        TweenLite.set("#pEnd", {x: rex, y: rey});
+
+        this.sketch._pstart[0].x = rsx;
+        this.sketch._pstart[0].y = rsy;
+        this.sketch._pend[0].x = rex;
+        this.sketch._pend[0].y = rey;
+
+
+        /*--------------------------------------------
+         ~ config stuff / dat-gui
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
-            initialPoints: 6,
-            radius: this.sketch.height / 4,
-            scaleFactor: .6,
-            initialOffset: this.sketch.height / 6,
-            maxSteps: 8,
+            scaleFactor: .45,
+            initialOffset: 250,
+            maxSteps: 5,
             iterateStep: 0,
-            fragStep: 0,
             color: this.sketch.colors[0],
             METHODS: {
                 reset: function () {
@@ -64,68 +98,56 @@ class Sketch_4 extends SketchTemplate {
 
         this.sketch.mousedown = function () {
             this.mouseIsDown = true;
-            this.step();
+            this.autoStep();
         };
 
         this.sketch.mouseup = function () {
             this.mouseIsDown = false;
         };
 
+
         this.sketch.autoStep = function () {
+            console.log(this._pstart[0].x)
+            this.points[0].x = this._pstart[0].x + 25;
+            this.points[0].y = this._pstart[0].y + 25;
+
+            this.points[1].x = this._pend[0].x + 25;
+            this.points[1].y = this._pend[0].y + 25;
+
             for (var i = this.iterateStep; i < this.CONFIG.maxSteps; i++) {
-                autoStep(this, i);
-            }
-
-            function autoStep(_scope, i) {
-                TweenMax.delayedCall(i * .1, function () {
-                    _scope.step();
-                })
-            }
-        };
-
-
-        this.sketch.step = function () {
-            if (this.iterateStep < this.CONFIG.maxSteps) {
-
-                //if (this.iterateStep == 0) this.clear();
-
-                // this.fillStyle = 'rgba(' + ~~this.palette[this.iterateStep].r + ',' + ~~this.palette[this.iterateStep].g + ',' + ~~this.palette[this.iterateStep].b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.3, .95]) + ')';
-
-                let color = chromatism.brightness(MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [0, -20]), this.colors[1]).rgb;
-                let newColor = chromatism.brightness(MathUtils.convertToRange(this.fracStep, [0, 5], [-25, 0]), color).rgb;
-                this.fillStyle = 'rgba(' + ~~newColor.r + ',' + ~~newColor.g + ',' + ~~newColor.b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.2, 1]) + ')';
-
                 this.iterate();
-
-                // this.clear();
-
-                this.filter = 'blur(' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [30, 0]) + 'px)';
-
-                this.draw();
             }
+            // this.clear();
+            this.drawFlash()
+
         };
 
 
-        this.sketch.draw = function () {
+        this.sketch.drawFlash = function () {
 
-            this.save();
-            //this.translate(this.width / 2, this.height / 2);
-            this.translate(this.vT.x, this.vT.y);
+            console.log('draw')
+
+
+            this.clear("black");
+            this.strokeStyle = "rgb(220, 200, 255)";
+            this.lineWidth = 4;
+            this.shadowColor = "rgb(255, 255, 255)";
+            this.shadowOffsetX = 0;
+            this.shadowOffsetY = 0;
+            this.shadowBlur = 20;
             this.beginPath();
             this.moveTo(this.points[0].x, this.points[0].y);
             for (var i = 1; i < this.points.length; i += 1) {
                 this.lineTo(this.points[i].x, this.points[i].y);
             }
-            this.fill();
-            this.restore();
+            this.stroke();
 
         };
 
         this.sketch.iterate = function () {
+            console.log('iterate')
 
-            if (this.fracStep == 0 && this.iterateStep == 0) {
-                this.clear();
-            }
+
             var newPoints = [];
             for (var i = 0; i < this.points.length - 1; i += 1) {
                 var p0 = this.points[i],
@@ -156,6 +178,22 @@ class Sketch_4 extends SketchTemplate {
         this.sketch.mousemove = function () {
         };
 
+        this.sketch.updateDrag = function () {
+            console.log('dsd')
+        };
+
+        this.sketch.updateIndicatorPositions = function () {
+            TweenMax.set(this.pStart, {
+                left: this.points[0].x - 25,
+                top: this.points[0].y - 25
+            })
+            TweenMax.set(this.pEnd, {
+                left: this.points[1].x - 25,
+                top: this.points[1].y - 25
+            })
+        };
+
+
         this.sketch.setup = function () {
             this.globalCompositeOperation = 'lighter';
             this.fillStyle = "#ffffff";
@@ -167,26 +205,29 @@ class Sketch_4 extends SketchTemplate {
             this.CONFIG.iterateStep = this.iterateStep;
 
 
-            this.palette = chromatism.fade(this.CONFIG.maxSteps, this.colors[0], this.colors[1]).rgb;
-            this.palette.forEach((color, index) => {
-                let _c = this.palette[index];
-                this.palette[index] = chromatism.brightness(-25, _c).rgb;
+            // this.points.push({
+            //     x: random() * this.width,
+            //     y: 25
+            // });
+            //
+            // this.points.push({
+            //     x: random() * this.width,
+            //     y: this.height - 25
+            // });
+
+            this.points.push({
+                x: 0,
+                y: 0
             });
 
-            for (var i = 0; i < this.CONFIG.initialPoints; i += 1) {
-                let angle = Math.PI * 2 / this.CONFIG.initialPoints * i;
-                this.points.push({
-                    x: cos(angle) * this.CONFIG.radius,
-                    y: sin(angle) * this.CONFIG.radius
-                });
-            }
+            this.points.push({
+                x: 0,
+                y: 0
+            });
 
-            this.points.push(this.points[0]);
 
-            if (this.fracStep == 0) {
-                this.clear();
-                this.draw();
-            }
+            // this.updateIndicatorPositions();
+
 
         };
 
@@ -194,8 +235,6 @@ class Sketch_4 extends SketchTemplate {
         this.sketch.reset = function () {
             this.clear();
             this.fillStyle = "#ffffff";
-            this.fracStep = 0;
-            this.CONFIG.fragStep = this.fracStep;
             this.setup();
         };
 
@@ -209,6 +248,8 @@ class Sketch_4 extends SketchTemplate {
 
     kill() {
         document.getElementById('dat-container').removeChild(this.gui.domElement);
+        document.getElementById('screen').removeChild(this.sketch.pStart);
+        document.getElementById('screen').removeChild(this.sketch.pEnd);
     }
 
 
@@ -221,15 +262,11 @@ class Sketch_4 extends SketchTemplate {
 
         document.getElementById('dat-container').appendChild(this.gui.domElement);
 
-        this.gui.add(this.sketch.CONFIG, 'initialPoints').min(3).max(12).step(1).name('initialPoints').onChange(this.setup.bind(this));
-        this.gui.add(this.sketch.CONFIG, 'radius').min(1).max(this.sketch.height).step(1).name('radius').onChange(this.setup.bind(this));
         this.gui.add(this.sketch.CONFIG, 'initialOffset').min(.01).max(this.sketch.height).step(1).name('initialOffset');
         this.gui.add(this.sketch.CONFIG, 'scaleFactor').min(.01).max(1.0).step(.01).name('scaleFactor');
         this.gui.add(this.sketch.CONFIG, 'maxSteps').min(1).max(10).step(1).name('maxSteps');
         this.gui.addColor(this.sketch.CONFIG, 'color').name('color').listen();
         this.gui.add(this.sketch.CONFIG, 'iterateStep').name('iterateStep').listen();
-        this.gui.add(this.sketch.CONFIG, 'fragStep').name('fragStep').listen();
-        this.gui.add(this.sketch.CONFIG.METHODS, 'newFrac').onChange(this.newFrac.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'autoStep').onChange(this.autoStep.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
 
@@ -238,13 +275,14 @@ class Sketch_4 extends SketchTemplate {
     setup() {
         //this.sketch.clear();
         this.sketch.setup();
+
     }
 
-    newFrac() {
-        this.sketch.fracStep += 1;
-        this.sketch.CONFIG.fragStep = this.sketch.fracStep;
-        this.sketch.setup();
+    dragUpdate() {
+        // console.log(this.sketch._pstart[0].x)
+        // this.sketch.updateDrag();
     }
+
 
     autoStep() {
         this.sketch.autoStep();
@@ -262,4 +300,4 @@ class Sketch_4 extends SketchTemplate {
 // Exports
 // ——————————————————————————————————————————————————
 
-export default Sketch_4;
+export default Sketch_5;

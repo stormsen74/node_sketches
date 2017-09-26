@@ -145,7 +145,7 @@ class Sketch_2 extends SketchTemplate {
     }
 
     save() {
-        console.log('sacve');
+        console.log('save');
     }
 
 
