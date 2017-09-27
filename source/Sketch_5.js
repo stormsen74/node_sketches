@@ -47,7 +47,7 @@ class Sketch_5 extends SketchTemplate {
         screen.appendChild(this.sketch.pStart);
         this.sketch._pstart = Draggable.create(this.sketch.pStart, {
             type: "x,y", edgeResistance: 0.5, bounds: "#screen", throwProps: false,
-            onDrag: this.dragUpdate.bind(this)
+            onDrag: this.onDrag.bind(this)
         });
 
 
@@ -58,7 +58,9 @@ class Sketch_5 extends SketchTemplate {
 
         this.sketch._pend = Draggable.create(this.sketch.pEnd, {
             type: "x,y", edgeResistance: 0.5, bounds: "#screen", throwProps: false,
-            onDrag: this.dragUpdate.bind(this)
+            onDrag: this.onDrag.bind(this),
+            onDragStart: this.onDragStart.bind(this),
+            onDragEnd: this.onDragEnd.bind(this),
         });
 
         TweenLite.set("#pStart", {x: this.sketch.vFp.x, y: this.sketch.vFp.y});
@@ -76,10 +78,17 @@ class Sketch_5 extends SketchTemplate {
 
         this.sketch.CONFIG = {
             scaleFactor: .45,
-            initialOffset: 250,
+            initialOffset: 125,
             maxSteps: 5,
             iterateStep: 0,
             color: this.sketch.colors[0],
+            blendmode: '',
+            BLENDMODES: {
+                overlay: 'overlay',
+                lighten: 'lighten',
+                darken: 'darken'
+            },
+            AUTO_CLEAR: true,
             METHODS: {
                 reset: function () {
                 },
@@ -103,7 +112,6 @@ class Sketch_5 extends SketchTemplate {
 
 
         this.sketch.autoStep = function () {
-            //console.log(this._pstart[0].x)
 
             this.points[0].x = this.vFp.x + 25;
             this.points[0].y = this.vFp.y + 25;
@@ -114,7 +122,7 @@ class Sketch_5 extends SketchTemplate {
             for (var i = this.iterateStep; i < this.CONFIG.maxSteps; i++) {
                 this.iterate();
             }
-            // this.clear();
+
             this.drawFlash()
 
         };
@@ -122,13 +130,8 @@ class Sketch_5 extends SketchTemplate {
 
         this.sketch.drawFlash = function () {
 
-            console.log('draw');
-
-            this.clear();
-            //this.clear("black");
-
             this.strokeStyle = "rgb(220, 200, 255)";
-            this.lineWidth = 4;
+            this.lineWidth = 3;
             this.shadowColor = "rgb(255, 255, 255)";
             this.shadowOffsetX = 0;
             this.shadowOffsetY = 0;
@@ -143,17 +146,15 @@ class Sketch_5 extends SketchTemplate {
         };
 
         this.sketch.iterate = function () {
-            console.log('iterate')
-
 
             var newPoints = [];
             for (var i = 0; i < this.points.length - 1; i += 1) {
-                var p0 = this.points[i],
-                    p1 = this.points[i + 1],
-                    newPoint = {
-                        x: (p0.x + p1.x) / 2,
-                        y: (p0.y + p1.y) / 2
-                    };
+                let p0 = this.points[i];
+                let p1 = this.points[i + 1];
+                let newPoint = {
+                    x: (p0.x + p1.x) / 2,
+                    y: (p0.y + p1.y) / 2
+                };
 
                 newPoint.x += random() * this.offset * 2 - this.offset;
                 newPoint.y += random() * this.offset * 2 - this.offset;
@@ -177,24 +178,13 @@ class Sketch_5 extends SketchTemplate {
         };
 
         this.sketch.updateDrag = function () {
-            console.log('dsd')
-        };
-
-        this.sketch.updateIndicatorPositions = function () {
-            TweenMax.set(this.pStart, {
-                left: this.points[0].x - 25,
-                top: this.points[0].y - 25
-            })
-            TweenMax.set(this.pEnd, {
-                left: this.points[1].x - 25,
-                top: this.points[1].y - 25
-            })
         };
 
 
         this.sketch.setup = function () {
-            this.globalCompositeOperation = 'lighter';
-            this.fillStyle = "#ffffff";
+
+            // https://developer.mozilla.org/de/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+            //this.globalCompositeOperation = 'darken';
 
             this.points = [];
             this.offset = this.CONFIG.initialOffset;
@@ -202,37 +192,21 @@ class Sketch_5 extends SketchTemplate {
             this.iterateStep = 0;
             this.CONFIG.iterateStep = this.iterateStep;
 
-
-            // this.points.push({
-            //     x: random() * this.width,
-            //     y: 25
-            // });
-            //
-            // this.points.push({
-            //     x: random() * this.width,
-            //     y: this.height - 25
-            // });
-
-            this.points.push({
-                x: 0,
-                y: 0
-            });
-
-            this.points.push({
-                x: 0,
-                y: 0
-            });
-
-
-            // this.updateIndicatorPositions();
-
+            this.points[0] = {x: 0, y: 0};
+            this.points[1] = {x: 0, y: 0};
 
         };
+
+        this.sketch.updateDraw = function () {
+            if (this.CONFIG.AUTO_CLEAR)  this.clear();
+
+            this.setup();
+            this.autoStep();
+        }
 
 
         this.sketch.reset = function () {
             this.clear();
-            this.fillStyle = "#ffffff";
             this.setup();
         };
 
@@ -267,29 +241,42 @@ class Sketch_5 extends SketchTemplate {
         this.gui.add(this.sketch.CONFIG, 'iterateStep').name('iterateStep').listen();
         this.gui.add(this.sketch.CONFIG.METHODS, 'autoStep').onChange(this.autoStep.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
+        this.gui.add(this.sketch.CONFIG, 'AUTO_CLEAR').name('AUTO_CLEAR');
+        this.gui.add(this.sketch.CONFIG, 'blendmode', this.sketch.CONFIG.BLENDMODES).name('blendmode').onChange(this.changeBlendmode.bind(this));
 
     }
 
     setup() {
-        //this.sketch.clear();
         this.sketch.setup();
 
     }
 
-    dragUpdate() {
-         //console.log(this.sketch._pstart[0].x)
+    changeBlendmode() {
+        console.log(this.sketch.globalCompositeOperation);
+        this.sketch.globalCompositeOperation = this.sketch.CONFIG.blendmode;
+        console.log(this.sketch.globalCompositeOperation);
+    }
+
+    onDrag() {
+        //console.log(this.sketch._pstart[0].x)
         this.sketch.vFp.x = this.sketch._pstart[0].x;
         this.sketch.vFp.y = this.sketch._pstart[0].y;
 
         this.sketch.vFn.x = this.sketch._pend[0].x;
         this.sketch.vFn.y = this.sketch._pend[0].y;
 
-        this.sketch.clear();
-        this.sketch.reset();
-        this.sketch.autoStep();
 
+        this.sketch.updateDraw();
         // this.sketch.updateDrag();
     }
+
+    onDragStart() {
+    };
+
+
+    onDragEnd() {
+        //this.sketch.updateDraw();
+    };
 
 
     autoStep() {
