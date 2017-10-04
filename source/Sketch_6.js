@@ -8,7 +8,7 @@ var chromatism = require('chromatism');
 var gsap = require('gsap');
 
 import SketchTemplate from "./SketchTemplate.js";
-import Circle from "./gfx/Circle.js";
+import Circle from "./geom/Circle.js";
 
 import {Vector2} from "./math/vector2";
 import Draggable from "gsap/Draggable";
@@ -30,6 +30,8 @@ class Sketch_6 extends SketchTemplate {
         this.sketch.circles = [];
         this.sketch.running = true;
         this.sketch.mouseIsDown = false;
+
+        this.sketch.imgData = new Image();
 
         this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
 
@@ -53,8 +55,19 @@ class Sketch_6 extends SketchTemplate {
         this.initControls();
 
 
-        this.sketch.mousedown = function () {
+        this.sketch.mousedown = function (e) {
             this.mouseIsDown = true;
+
+            //let x = e.clientX;
+            //let y = e.clientY;
+            //
+            //let c = this.getImageData(x, y, 1, 1).data;
+            //console.log(c);
+            //
+            //let clr = {r: c[0], g: c[1], b: c[2]};
+            //console.log(clr)
+
+
         };
 
         this.sketch.mouseup = function () {
@@ -68,11 +81,7 @@ class Sketch_6 extends SketchTemplate {
 
         this.sketch.draw = function () {
 
-            //if (this.circles.length < this.CONFIG.maxCircles) {
-            //    let c = new Circle(random(this.width), random(this.height), 1);
-            //    this.circles.push(c);
-            //}
-
+            this.drawImage(this.imgData, 0, 0);
 
             if (this.circles.length < this.CONFIG.maxCircles) {
 
@@ -131,6 +140,41 @@ class Sketch_6 extends SketchTemplate {
         };
 
 
+        this.sketch.rgbToHex = function (r, g, b) {
+            if (r > 255 || g > 255 || b > 255)
+                throw "Invalid color component";
+            return ((r << 16) | (g << 8) | b).toString(16);
+        };
+
+        this.sketch.sampleColors = function () {
+            let x = 150;
+            let y = 150;
+
+            let c = this.getImageData(x, y, 1, 1).data;
+            let clr = {r: c[0], g: c[1], b: c[2]};
+            let hex = "#" + ("000000" + this.rgbToHex(clr.r, clr.g, clr.b)).slice(-6);
+            console.log(hex);
+
+            this.running = true;
+        };
+
+        this.sketch.initImage = function (_that) {
+            this.imgData.src = 'assets/images/sampleMap.png';
+
+            this.imgData.onload = function () {
+                console.log(_that.imgData.src);
+                //_that.drawImage(img, 0, 0)
+
+                _that.drawImage(_that.imgData, 0, 0);
+                _that.sampleColors();
+            };
+
+            //this.sampleColors();
+
+
+        };
+
+
         this.sketch.setup = function () {
 
             // https://developer.mozilla.org/de/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
@@ -144,6 +188,10 @@ class Sketch_6 extends SketchTemplate {
 
 
             //this.draw();
+
+            this.running = false;
+
+            this.initImage(this);
 
         };
 

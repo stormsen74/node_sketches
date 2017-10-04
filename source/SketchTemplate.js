@@ -49,7 +49,7 @@ class SketchTemplate {
 
             this.lineWidth = _strokeWidth;
             this.strokeStyle = _strokeColor;
-           this.fillStyle = _fillColor;
+            this.fillStyle = _fillColor;
 
             this.beginPath();
             this.arc(x, y, _radius, 0, TWO_PI);

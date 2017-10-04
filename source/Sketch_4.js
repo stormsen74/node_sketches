@@ -85,8 +85,11 @@ class Sketch_4 extends SketchTemplate {
 
 
         this.sketch.step = function () {
+
+
             if (this.iterateStep < this.CONFIG.maxSteps) {
 
+            console.log('step');
                 //if (this.iterateStep == 0) this.clear();
 
                 // this.fillStyle = 'rgba(' + ~~this.palette[this.iterateStep].r + ',' + ~~this.palette[this.iterateStep].g + ',' + ~~this.palette[this.iterateStep].b + ',' + MathUtils.convertToRange(this.iterateStep, [0, this.CONFIG.maxSteps], [.3, .95]) + ')';
@@ -107,6 +110,8 @@ class Sketch_4 extends SketchTemplate {
 
 
         this.sketch.draw = function () {
+
+            console.log('draw')
 
             this.save();
             //this.translate(this.width / 2, this.height / 2);
@@ -150,8 +155,6 @@ class Sketch_4 extends SketchTemplate {
         this.sketch.update = function () {
         };
 
-        this.sketch.draw = function () {
-        };
 
         this.sketch.mousemove = function () {
         };
