@@ -85,8 +85,25 @@ class Sketch_6 extends SketchTemplate {
 
             if (this.circles.length < this.CONFIG.maxCircles) {
 
-                for (let i = 0; i < parseInt(this.CONFIG.stepCircles); i++) {
-                    this.createCircle();
+                let c = this.createCircle();
+
+                let count = 0;
+                let attempts = 0;
+
+                while (count < this.CONFIG.stepCircles) {
+
+                    let c = this.createCircle();
+
+                    if (c != null) {
+                        this.circles.push(c);
+                        count++;
+                    }
+
+                    attempts++;
+                    if (attempts > 1000) {
+                        break;
+                    }
+
                 }
 
             }
@@ -119,18 +136,22 @@ class Sketch_6 extends SketchTemplate {
             let c = new Circle(x, y, 1);
 
             let valid = true;
-            this.circles.forEach((c, index) => {
-                let vC = new Vector2(c.x, c.y);
+            this.circles.forEach((_c, index) => {
+                let vC = new Vector2(_c.x, _c.y);
                 let d = Vector2.getDistance(new Vector2(x, y), vC);
-                if (d < c.r + 1) {
+                if (d < _c.r + 1) {
                     valid = false;
                     return
                 }
 
             });
 
-            if (valid)
-                this.circles.push(c);
+            if (valid) {
+                //this.circles.push(c);
+                return new Circle(x, y, 1)
+            } else {
+                return null;
+            }
         };
 
         this.sketch.mousemove = function () {
