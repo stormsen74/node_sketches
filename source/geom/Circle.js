@@ -5,10 +5,11 @@
 
 class Circle {
 
-    constructor(x, y, r) {
+    constructor(x, y, r, color) {
         this.x = x || 0;
         this.y = y || 0;
         this.r = r || 100;
+        this.color = color || '#fff';
 
         this.growing = true;
     }

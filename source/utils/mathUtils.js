@@ -4,7 +4,7 @@
 
 // export const PI = 3.14159;
 // export const HALF_PI = 1.57079;
-// export const TWO_PI = 6.28318;
+ export const TWO_PI = 6.28318;
 
 class mathUtils {
 

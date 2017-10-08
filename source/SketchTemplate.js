@@ -43,7 +43,7 @@ class SketchTemplate {
 
         this.sketch.plotPoint = function (x, y, radius, strokeWidth, strokeColor, fillColor) {
             let _radius = radius || 10;
-            let _strokeWidth = strokeWidth || 1;
+            let _strokeWidth = strokeWidth || 'noStroke';
             let _strokeColor = strokeColor || '#fff';
             let _fillColor = fillColor || 'noFill';
 
@@ -54,9 +54,8 @@ class SketchTemplate {
             this.beginPath();
             this.arc(x, y, _radius, 0, TWO_PI);
             if (_fillColor != 'noFill') this.fill();
-            if (_strokeWidth > 0) {
-                this.stroke();
-            }
+            if (_strokeWidth != 'noStroke') this.stroke();
+
         };
 
 
