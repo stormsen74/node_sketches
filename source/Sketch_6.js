@@ -9,10 +9,7 @@ var gsap = require('gsap');
 
 import SketchTemplate from "./SketchTemplate.js";
 import Circle from "./geom/Circle.js";
-import mathUtils from "./utils/mathUtils.js";
-
 import {Vector2} from "./math/vector2";
-import Draggable from "gsap/Draggable";
 
 class Sketch_6 extends SketchTemplate {
 
@@ -175,12 +172,11 @@ class Sketch_6 extends SketchTemplate {
             //y = this.vCenter.y + this.vTarget.y + this.vecWanderTheta.y;
 
 
-
             let valid = true;
             this.circles.forEach((_c, index) => {
                 let vC = new Vector2(_c.x, _c.y);
                 let d = Vector2.getDistance(new Vector2(x, y), vC);
-                if (d < _c.r + 1) {
+                if (d + 2 < _c.r ) {
                     valid = false;
                     return
                 }
@@ -189,16 +185,16 @@ class Sketch_6 extends SketchTemplate {
 
             if (valid) {
 
-
                 let index = ~~x + ~~y * this.img.width;
                 let color = {
                     r: this.imgData.data[index * 4],
                     g: this.imgData.data[index * 4 + 1],
                     b: this.imgData.data[index * 4 + 2],
                     a: this.imgData.data[index * 4 + 3]
-                }
+                };
                 let hex = "#" + ("000000" + this.rgbToHex(color.r, color.g, color.b)).slice(-6);
                 return new Circle(x, y, 1, hex)
+
             } else {
                 return null;
             }
