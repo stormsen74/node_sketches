@@ -40,11 +40,15 @@ class Sketches {
 
         for (var i = 1; i < this.sketches.length; i++) {
             let node = document.createElement('div');
-            node.classList.add('select_box');
-            //node.style.background = 'url("assets/sketch_thumbs/thumb_1.jpg")';
-            node.style.backgroundColor = '#2b2b2b';
-            node.innerHTML = 'sketch | ' + i;
+            let text = document.createElement('div');
+            let path = 'assets/sketch_thumbs/thumb_' + i + '.png';
             node._id = i;
+            node.classList.add('select_box');
+            node.style.background = 'url(' + path + ')';
+            node.appendChild(text);
+
+            text.classList.add('select_text');
+            text.innerHTML = 'sketch | ' + i;
             node.addEventListener('click', this.onSelectSketch.bind(this));
             this.select.appendChild(node);
         }

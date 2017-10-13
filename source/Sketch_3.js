@@ -37,8 +37,8 @@ class Sketch_3 extends SketchTemplate {
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
-            A: 1,
-            B: 1,
+            A: 7,
+            B: 6,
             DELTA: Math.PI * .5,
             SPEED: 0.09,
             SPEED_M: 1,

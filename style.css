@@ -3,7 +3,8 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    font-family: 'Verdana, Geneva, sans-serif';
+    font-family: 'Ubuntu', sans-serif;
+
 }
 
 .select_box {
@@ -11,12 +12,17 @@ body {
     height: 200px;
     background-color: #5d6773;
     float: left;
-    outline: 1px solid #ffffff;
+    outline: 1px solid #c4ae45;
     outline-offset: -1px;
     margin: 5px 2.5px 2.5px 5px;
     cursor: pointer;
-    background: url("assets/sketch_thumbs/thumb_2.png");
-    /*background-color: #2b2b2b;*/
+
+    background-color: #40454a;
+}
+
+.select_text {
+    color: #a1ad8a;
+    padding: 5px;
 }
 
 .pStart {
