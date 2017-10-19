@@ -3,7 +3,6 @@
  */
 
 
-// var Sketch = require('sketch-js');
 var chromatism = require('chromatism');
 
 import SketchTemplate from "./SketchTemplate.js";
@@ -66,8 +65,6 @@ class Sketch_1 extends SketchTemplate {
         this.sketch.drawPolar = function () {
             this.phi += this.CONFIG.dPhi;
             this.t += this.CONFIG.dT;
-
-            console.log(this.vecWanderTheta)
 
             this.vecWanderTheta.toPolar();
             // phi

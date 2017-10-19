@@ -2,13 +2,14 @@
  * Created by STORMSEN on 29.11.2016.
  */
 
-var gsap = require('gsap');
+//var gsap = require('gsap');
 import Sketch_1 from "./Sketch_1.js";
 import Sketch_2 from "./Sketch_2.js";
 import Sketch_3 from "./Sketch_3.js";
 import Sketch_4 from "./Sketch_4.js";
 import Sketch_5 from "./Sketch_5.js";
 import Sketch_6 from "./Sketch_6.js";
+import Sketch_7 from "./Sketch_7.js";
 
 
 class Sketches {
@@ -25,13 +26,9 @@ class Sketches {
             Sketch_3,
             Sketch_4,
             Sketch_5,
-            Sketch_6
+            Sketch_6,
+            Sketch_7
         ];
-
-
-        // DEVELOP
-        // this.sketch = new this.sketches[3]();
-        // return;
 
 
         this.select = document.getElementById('select');
@@ -39,6 +36,7 @@ class Sketches {
         this.closeButton.addEventListener('click', this.onCloseSketch.bind(this));
 
         for (var i = 1; i < this.sketches.length; i++) {
+            console.log(i)
             let node = document.createElement('div');
             let text = document.createElement('div');
             let path = 'assets/sketch_thumbs/thumb_' + i + '.png';
@@ -59,9 +57,8 @@ class Sketches {
     }
 
     onSelectSketch(e) {
-        console.log(e.target._id)
+        console.log(e.target)
         this.sketch = new this.sketches[e.target._id]();
-
         this.select.style.display = 'none';
         this.closeButton.style.display = 'block'
     }

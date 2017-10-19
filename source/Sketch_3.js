@@ -3,7 +3,6 @@
  */
 
 
-// var Sketch = require('sketch-js');
 var chromatism = require('chromatism');
 
 import SketchTemplate from "./SketchTemplate.js";
