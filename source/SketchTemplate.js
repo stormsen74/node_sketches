@@ -4,6 +4,7 @@
 
 
 var Sketch = require('sketch-js');
+import MathUtils from "./utils/mathUtils";
 
 class SketchTemplate {
 

@@ -179,7 +179,6 @@ class Sketch_6 extends SketchTemplate {
                     valid = false;
                     return
                 }
-
             });
 
             if (valid) {
