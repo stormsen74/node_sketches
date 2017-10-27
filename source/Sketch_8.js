@@ -4,8 +4,10 @@
 
 
 var chromatism = require('chromatism');
+var chroma = require('chroma-js');
 
 import SketchTemplate from "./SketchTemplate.js";
+import mathUtils from "./utils/mathUtils.js"
 import {Vector2} from "./math/vector2";
 
 class Sketch_8 extends SketchTemplate {
@@ -20,6 +22,13 @@ class Sketch_8 extends SketchTemplate {
 
         console.log('Sketch_8!');
 
+        console.log(mathUtils.getRandomBetween(10, 40))
+
+        // https://gka.github.io/chroma.js/
+        let c = chroma.hsl(330, 1, 0.6);
+        c = chroma.hsl(333.0, 1, 0.6);
+        console.log(c.hex())
+
         /*--------------------------------------------
          ~ sketch variables
          --------------------------------------------*/
@@ -27,6 +36,7 @@ class Sketch_8 extends SketchTemplate {
         this.sketch.goldenRatio = 1.61803398875;
         this.sketch.fibonacciAngle = 137.5;
         this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
+        this.sketch.cells = [];
 
         /*--------------------------------------------
          ~ confif stuff / dat-gui
@@ -68,9 +78,13 @@ class Sketch_8 extends SketchTemplate {
 
 
         this.sketch.getValue = function (x, y) {
-            // return (x + y) * 0.001 * Math.PI * 2;
+
+            // return (y - x) * 0.001 * Math.PI * 2;
 
             // return (Math.sin(x * 0.01) + Math.sin(y * 0.01)) * Math.PI * 2;
+
+            // return
+
 
             // clifford attractor
             // http://paulbourke.net/fractals/clifford/
@@ -89,26 +103,33 @@ class Sketch_8 extends SketchTemplate {
         };
 
         this.sketch.render = function (value) {
+
+            let c = chroma.hsl(330, 1, 0.6);
+            c = chroma.hsl(333.0, 1, 0.6);
+            console.log(c.hex())
+
             this.strokeStyle = chromatism.convert(({h: 20 + Math.abs(value) * 20, s: 50, l: 40})).hex;
+
             this.rotate(value);
             this.beginPath();
             this.moveTo(0, 0);
-            this.lineTo(20, 1);
+            this.lineTo(value * 10, -value * 10);
             this.stroke();
         }
 
         this.sketch.plotField = function () {
             console.log('plotField');
 
-            // this.globalCompositeOperation = 'overlay';
+            this.globalCompositeOperation = 'add';
             // let color = ({h: 90, s: 50, l: 40});
             // this.strokeStyle = chromatism.convert(color).hex;
             // this.strokeStyle = '#ffffff';
-            this.lineWidth = .5;
+            this.lineWidth = 1;
 
             for (let i = 0; i < this.CONFIG.DRAWS_PER_CALL; i++) {
                 let x = Math.random() * this.width;
                 let y = Math.random() * this.height;
+
 
                 let value = this.getValue(x, y);
 
@@ -119,6 +140,8 @@ class Sketch_8 extends SketchTemplate {
                 this.render(value);
 
                 this.restore();
+
+                // this.plotPoint(x, y, 2, 0, '#ff0000', '#cccccc');
             }
 
         };
