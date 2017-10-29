@@ -36,10 +36,20 @@ class Sketch_8 extends SketchTemplate {
         this.sketch.goldenRatio = 1.61803398875;
         this.sketch.fibonacciAngle = 137.5;
         this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
-        this.sketch.cells = [];
+        this.sketch.points = [];
+
+        this.sketch.forceStep = 0;
+        let Q1 = new Vector2(200, this.sketch.height * .5);
+        let Q2 = new Vector2(this.sketch.width - 200, this.sketch.height * .5);
+
+        Q1.charge = 1.5;
+        Q2.charge = -1.5;
+
+        this.sketch.fields = [Q1, Q2];
+
 
         /*--------------------------------------------
-         ~ confif stuff / dat-gui
+         ~ config stuff / dat-gui
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
@@ -53,6 +63,8 @@ class Sketch_8 extends SketchTemplate {
             METHODS: {
                 shuffle: function () {
                 },
+                run: function () {
+                },
                 reset: function () {
                 }
             }
@@ -65,15 +77,54 @@ class Sketch_8 extends SketchTemplate {
 
         this.sketch.setup = function () {
             console.log('setup');
-            // this.plotPoint(this.vCenter.x, this.vCenter.y, 5, 1, '#ff0000', '#0000ff');
+
+            this.lineWidth = .5;
+            this.strokeStyle = 'rgba(196, 174, 69, .2)';
+            this.globalCompositeOperation = 'lighter';
+
+
+            for (let y = 0; y < this.height; y += 10) {
+                this.points.push({
+                    x: 0,
+                    y: y,
+                    vx: 0,
+                    vy: 0
+                })
+            }
 
         };
 
         this.sketch.mousedown = function () {
-            this.plotField();
+            // this.plotField();
+            this.plotForce();
         };
 
         this.sketch.mousemove = function () {
+        };
+
+
+        this.sketch.getForce = function (vLocation) {
+
+            let eVecRes = new Vector2();
+
+            for (var i = 0; i < this.fields.length; i++) {
+                let field = this.fields[i];
+                field.rVec = Vector2.subtract(vLocation, field);
+                field.eVec = field.rVec.clone();
+                field.eVec.multiplyScalar(field.charge / (4 * Math.PI));
+                field.eVec.multiplyScalar(1 / Math.pow(field.rVec.length(), 2));
+                field.eVec.multiplyScalar(100000);
+
+                if (i == 0) {
+                    eVecRes = this.fields[0].eVec;
+                } else {
+                    eVecRes.add(this.fields[i].eVec);
+                }
+            }
+
+            // console.log(eVecRes)
+            return eVecRes;
+
         };
 
 
@@ -85,12 +136,23 @@ class Sketch_8 extends SketchTemplate {
 
             // return
 
+            let scale = 0.01;
+            x = (x - this.width * .5) * scale;
+            y = (y - this.height * .5) * scale;
+            // let v = new Vector2(Math.sin(y), Math.sin(x));
+            // let v = new Vector2(Math.pow(y, 2), Math.pow(x, 2));
+            let v = new Vector2(y, -x);
+
+            return v.angle();
+
+            return
+
 
             // clifford attractor
             // http://paulbourke.net/fractals/clifford/
 
             // scale down x and y
-            let scale = 0.005;
+            // let scale = 0.005;
             x = (x - this.width * .5) * scale;
             y = (y - this.height * .5) * scale;
 
@@ -102,28 +164,93 @@ class Sketch_8 extends SketchTemplate {
             return Math.atan2(y1 - y, x1 - x);
         };
 
-        this.sketch.render = function (value) {
 
-            let c = chroma.hsl(330, 1, 0.6);
-            c = chroma.hsl(333.0, 1, 0.6);
-            console.log(c.hex())
+        this.sketch.render = function () {
 
-            this.strokeStyle = chromatism.convert(({h: 20 + Math.abs(value) * 20, s: 50, l: 40})).hex;
+            for (var i = 0; i < this.points.length; i++) {
+                // get each point and do what we did before with a single point
+                let p = this.points[i];
+                let value = this.getValue(p.x, p.y);
+                p.vx += Math.cos(value) * 0.2;
+                p.vy += Math.sin(value) * 0.2;
+
+                // move to current position
+                this.beginPath();
+                this.moveTo(p.x, p.y);
+
+                // add velocity to position and line to new position
+                p.x += p.vx;
+                p.y += p.vy;
+                this.lineTo(p.x, p.y);
+                this.stroke();
+
+                // apply some friction so point doesn't speed up too much
+                p.vx *= 0.99;
+                p.vy *= 0.99;
+
+                // wrap around edges of screen
+                if (p.x > this.width) p.x = 0;
+                if (p.y > this.height) p.y = 0;
+                if (p.x < 0) p.x = this.width;
+                if (p.y < 0) p.y = this.height;
+            }
+        };
+
+        this.sketch.update = function () {
+            this.render();
+        }
+
+
+        this.sketch.renderForce = function (vForce) {
+            // vForce.normalize();
+            // console.log(vForce.length())
+
+            let mag = Math.min(vForce.length(), 200);
+
+            this.strokeStyle = chroma.hsl(
+                mathUtils.convertToRange(mag, [0, 200], [120, 260]),
+                // 20 + Math.abs(vForce.length()) * 20,
+                .5,
+                .4,
+            ).hex();
+
+            this.rotate(vForce.angle());
+            this.beginPath();
+            this.moveTo(0, 0);
+            // this.lineTo(mag * .5, -mag * .5);
+            this.lineTo(20, 1);
+            this.stroke();
+        }
+
+
+        this.sketch.renderField = function (value) {
+
+            // this.strokeStyle = chromatism.convert(({h: 20 + Math.abs(value) * 20, s: 50, l: 40})).hex;
+            this.strokeStyle = chroma.hsl(
+                // mathUtils.convertToRange(Math.abs(value), [0, Math.PI * 2], [0, 60]),
+                20 + Math.abs(value) * 20,
+                .5,
+                .4,
+            ).hex();
 
             this.rotate(value);
             this.beginPath();
             this.moveTo(0, 0);
-            this.lineTo(value * 10, -value * 10);
+            // this.lineTo(value * 10, -value * 10);
+            this.lineTo(20, 1);
             this.stroke();
-        }
+        };
 
-        this.sketch.plotField = function () {
-            console.log('plotField');
 
-            this.globalCompositeOperation = 'add';
-            // let color = ({h: 90, s: 50, l: 40});
-            // this.strokeStyle = chromatism.convert(color).hex;
-            // this.strokeStyle = '#ffffff';
+        this.sketch.plotForce = function () {
+
+            this.filter = 'blur(' + mathUtils.convertToRange(this.forceStep, [0, 10], [10, 0]) + 'px)';
+            this.forceStep += 1;
+
+            console.log(this.forceStep)
+
+
+            this.globalCompositeOperation = 'lighter';
             this.lineWidth = 1;
 
             for (let i = 0; i < this.CONFIG.DRAWS_PER_CALL; i++) {
@@ -131,13 +258,41 @@ class Sketch_8 extends SketchTemplate {
                 let y = Math.random() * this.height;
 
 
-                let value = this.getValue(x, y);
+                // let value = this.getValue(x, y);
+                let vForce = this.getForce(new Vector2(x, y));
 
                 this.save();
 
                 this.translate(x, y);
 
-                this.render(value);
+                this.renderForce(vForce);
+
+                this.restore();
+
+                // this.plotPoint(x, y, 2, 0, '#ff0000', '#cccccc');
+            }
+
+        }
+
+        this.sketch.plotField = function () {
+            // console.log('plotField');
+
+            this.globalCompositeOperation = 'lighter';
+            this.lineWidth = 1;
+
+            for (let i = 0; i < this.CONFIG.DRAWS_PER_CALL; i++) {
+                let x = Math.random() * this.width;
+                let y = Math.random() * this.height;
+
+
+                // let value = this.getValue(x, y);
+                let value = this.getForce(new Vector2(x, y));
+
+                this.save();
+
+                this.translate(x, y);
+
+                this.renderField(value);
 
                 this.restore();
 
@@ -168,6 +323,7 @@ class Sketch_8 extends SketchTemplate {
 
         this.gui.add(this.sketch.CONFIG, 'DRAWS_PER_CALL').min(100).max(20000).step(1).name('DRAWS_PER_CALL');
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
+        this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
 
         let f1 = this.gui.addFolder('clifford attractor');
         f1.add(this.sketch.CONFIG.ATTRACTOR, 'a').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
@@ -193,8 +349,22 @@ class Sketch_8 extends SketchTemplate {
         this.sketch.plotField();
     }
 
+    run() {
+        this.sketch.running = !this.sketch.running;
+    }
+
     reset() {
         this.sketch.clear();
+
+        this.sketch.forceStep = 0;
+
+        for (var i = 0; i < this.sketch.points.length; i++) {
+            let p = this.sketch.points[i];
+            p.x = 0;
+            p.y = i * 10;
+            p.vx = 0;
+            p.vy = 0;
+        }
     }
 
 
