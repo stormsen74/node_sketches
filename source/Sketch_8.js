@@ -5,6 +5,7 @@
 
 var chromatism = require('chromatism');
 var chroma = require('chroma-js');
+var CCapture = require('ccapture.js')
 
 import SketchTemplate from "./SketchTemplate.js";
 import mathUtils from "./utils/mathUtils.js"
@@ -22,12 +23,19 @@ class Sketch_8 extends SketchTemplate {
 
         console.log('Sketch_8!');
 
-        console.log(mathUtils.getRandomBetween(10, 40))
-
         // https://gka.github.io/chroma.js/
         let c = chroma.hsl(330, 1, 0.6);
         c = chroma.hsl(333.0, 1, 0.6);
         console.log(c.hex())
+
+
+        this.sketch.capturer = new CCapture({
+            verbose: true,
+            framerate: 10,
+            format: 'png'
+        })
+
+        this.sketch._canvas = document.querySelector('#screen canvas');
 
         /*--------------------------------------------
          ~ sketch variables
@@ -59,11 +67,16 @@ class Sketch_8 extends SketchTemplate {
                 c: Math.random() * 4 - 2,
                 d: Math.random() * 4 - 2
             },
-            DRAWS_PER_CALL: 1000,
+            DRAWS_PER_CALL: 100,
+            NUM_RENDER_STEPS: 3,
             METHODS: {
                 shuffle: function () {
                 },
                 run: function () {
+                },
+                startCapture: function () {
+                },
+                stopCapture: function () {
                 },
                 reset: function () {
                 }
@@ -80,6 +93,7 @@ class Sketch_8 extends SketchTemplate {
 
             this.lineWidth = .5;
             this.strokeStyle = 'rgba(196, 174, 69, .2)';
+            this.fillStyle = "rgba(23, 23, 26, 1)";
             this.globalCompositeOperation = 'lighter';
 
 
@@ -96,7 +110,31 @@ class Sketch_8 extends SketchTemplate {
 
         this.sketch.mousedown = function () {
             // this.plotField();
-            this.plotForce();
+
+            // this.plotForce();
+
+
+            // Q2.set(this.mouse.x, this.mouse.y)
+            this.steppedRender();
+
+
+        };
+
+
+        this.sketch.steppedRender = function () {
+            this.clear();
+
+
+            this.fillRect(0, 0, this.width, this.height);
+
+            this.forceStep = 0;
+            while (this.forceStep <= this.CONFIG.NUM_RENDER_STEPS) {
+                this.filter = 'blur(' + mathUtils.convertToRange(this.forceStep, [0, this.CONFIG.NUM_RENDER_STEPS], [10, 0]) + 'px)';
+                this.forceStep += 1;
+                this.plotForce();
+            }
+
+
         };
 
         this.sketch.mousemove = function () {
@@ -115,20 +153,18 @@ class Sketch_8 extends SketchTemplate {
                 field.eVec.multiplyScalar(1 / Math.pow(field.rVec.length(), 2));
                 field.eVec.multiplyScalar(100000);
 
-                if (i == 0) {
-                    eVecRes = this.fields[0].eVec;
-                } else {
-                    eVecRes.add(this.fields[i].eVec);
-                }
+                i == 0 ? eVecRes = this.fields[0].eVec : eVecRes.add(this.fields[i].eVec);
             }
 
-            // console.log(eVecRes)
             return eVecRes;
 
         };
 
 
         this.sketch.getValue = function (x, y) {
+
+            // https://www.bit-101.com/blog/2017/10/23/flow-fields-part-i/
+
 
             // return (y - x) * 0.001 * Math.PI * 2;
 
@@ -197,19 +233,20 @@ class Sketch_8 extends SketchTemplate {
         };
 
         this.sketch.update = function () {
-            this.render();
-        }
+            // this.render();
+
+            this.steppedRender();
+            this.capturer.capture(this._canvas);
+        };
 
 
         this.sketch.renderForce = function (vForce) {
-            // vForce.normalize();
-            // console.log(vForce.length())
 
             let mag = Math.min(vForce.length(), 200);
+            let invertMag = (200 - mag) * .7;
 
             this.strokeStyle = chroma.hsl(
-                mathUtils.convertToRange(mag, [0, 200], [120, 260]),
-                // 20 + Math.abs(vForce.length()) * 20,
+                mathUtils.convertToRange(mag, [0, 200], [150, 260]),
                 .5,
                 .4,
             ).hex();
@@ -217,8 +254,8 @@ class Sketch_8 extends SketchTemplate {
             this.rotate(vForce.angle());
             this.beginPath();
             this.moveTo(0, 0);
-            // this.lineTo(mag * .5, -mag * .5);
-            this.lineTo(20, 1);
+            this.lineTo(invertMag * .5, -invertMag * .5);
+            // this.lineTo(20, 1);
             this.stroke();
         }
 
@@ -244,49 +281,26 @@ class Sketch_8 extends SketchTemplate {
 
         this.sketch.plotForce = function () {
 
-            this.filter = 'blur(' + mathUtils.convertToRange(this.forceStep, [0, 10], [10, 0]) + 'px)';
-            this.forceStep += 1;
-
-            console.log(this.forceStep)
-
-
-            this.globalCompositeOperation = 'lighter';
-            this.lineWidth = 1;
-
             for (let i = 0; i < this.CONFIG.DRAWS_PER_CALL; i++) {
                 let x = Math.random() * this.width;
                 let y = Math.random() * this.height;
-
-
-                // let value = this.getValue(x, y);
                 let vForce = this.getForce(new Vector2(x, y));
-
                 this.save();
-
                 this.translate(x, y);
-
                 this.renderForce(vForce);
-
                 this.restore();
-
-                // this.plotPoint(x, y, 2, 0, '#ff0000', '#cccccc');
             }
-
-        }
+        };
 
         this.sketch.plotField = function () {
             // console.log('plotField');
 
-            this.globalCompositeOperation = 'lighter';
-            this.lineWidth = 1;
-
             for (let i = 0; i < this.CONFIG.DRAWS_PER_CALL; i++) {
                 let x = Math.random() * this.width;
                 let y = Math.random() * this.height;
 
 
-                // let value = this.getValue(x, y);
-                let value = this.getForce(new Vector2(x, y));
+                let value = this.getValue(x, y);
 
                 this.save();
 
@@ -322,8 +336,11 @@ class Sketch_8 extends SketchTemplate {
         //this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE').onChange(this.updateParams.bind(this));
 
         this.gui.add(this.sketch.CONFIG, 'DRAWS_PER_CALL').min(100).max(20000).step(1).name('DRAWS_PER_CALL');
+        this.gui.add(this.sketch.CONFIG, 'NUM_RENDER_STEPS').min(1).max(15).step(1).name('NUM_RENDER_STEPS');
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
+        this.gui.add(this.sketch.CONFIG.METHODS, 'startCapture').onChange(this.startCapture.bind(this));
+        this.gui.add(this.sketch.CONFIG.METHODS, 'stopCapture').onChange(this.stopCapture.bind(this));
 
         let f1 = this.gui.addFolder('clifford attractor');
         f1.add(this.sketch.CONFIG.ATTRACTOR, 'a').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
@@ -353,8 +370,21 @@ class Sketch_8 extends SketchTemplate {
         this.sketch.running = !this.sketch.running;
     }
 
+    startCapture() {
+        this.sketch.capturer.start();
+        this.sketch.running = true;
+    }
+
+    stopCapture() {
+        this.sketch.capturer.stop();
+        this.sketch.capturer.save();
+        this.sketch.running = false;
+    }
+
     reset() {
         this.sketch.clear();
+        this.sketch.capturer.stop();
+        this.running = false;
 
         this.sketch.forceStep = 0;
 
