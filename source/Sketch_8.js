@@ -8,7 +8,7 @@ var chroma = require('chroma-js');
 var CCapture = require('ccapture.js')
 
 import SketchTemplate from "./SketchTemplate.js";
-import mathUtils from "./utils/mathUtils.js"
+import mathUtils from "./utils/mathUtils.js";
 import {Vector2} from "./math/vector2";
 
 class Sketch_8 extends SketchTemplate {
@@ -31,7 +31,9 @@ class Sketch_8 extends SketchTemplate {
 
         this.sketch.capturer = new CCapture({
             verbose: true,
+            name: 'frame',
             framerate: 10,
+            autoSaveTime: 10,
             format: 'png'
         })
 
@@ -74,6 +76,8 @@ class Sketch_8 extends SketchTemplate {
                 },
                 run: function () {
                 },
+                renderForce: function () {
+                },
                 startCapture: function () {
                 },
                 stopCapture: function () {
@@ -115,16 +119,15 @@ class Sketch_8 extends SketchTemplate {
 
 
             // Q2.set(this.mouse.x, this.mouse.y)
-            this.steppedRender();
+            // this.steppedRender();
 
 
         };
 
 
         this.sketch.steppedRender = function () {
+
             this.clear();
-
-
             this.fillRect(0, 0, this.width, this.height);
 
             this.forceStep = 0;
@@ -339,6 +342,7 @@ class Sketch_8 extends SketchTemplate {
         this.gui.add(this.sketch.CONFIG, 'NUM_RENDER_STEPS').min(1).max(15).step(1).name('NUM_RENDER_STEPS');
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
+        this.gui.add(this.sketch.CONFIG.METHODS, 'renderForce').onChange(this.renderForce.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'startCapture').onChange(this.startCapture.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'stopCapture').onChange(this.stopCapture.bind(this));
 
@@ -370,9 +374,13 @@ class Sketch_8 extends SketchTemplate {
         this.sketch.running = !this.sketch.running;
     }
 
+    renderForce() {
+        this.sketch.steppedRender();
+    }
+
     startCapture() {
-        this.sketch.capturer.start();
         this.sketch.running = true;
+        this.sketch.capturer.start();
     }
 
     stopCapture() {
