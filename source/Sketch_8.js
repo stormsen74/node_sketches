@@ -5,7 +5,6 @@
 
 var chromatism = require('chromatism');
 var chroma = require('chroma-js');
-var CCapture = require('ccapture.js')
 
 import SketchTemplate from "./SketchTemplate.js";
 import mathUtils from "./utils/mathUtils.js";
@@ -28,16 +27,6 @@ class Sketch_8 extends SketchTemplate {
         c = chroma.hsl(333.0, 1, 0.6);
         console.log(c.hex())
 
-
-        this.sketch.capturer = new CCapture({
-            verbose: true,
-            name: 'frame',
-            framerate: 10,
-            autoSaveTime: 10,
-            format: 'png'
-        })
-
-        this.sketch._canvas = document.querySelector('#screen canvas');
 
         /*--------------------------------------------
          ~ sketch variables
@@ -76,11 +65,9 @@ class Sketch_8 extends SketchTemplate {
                 },
                 run: function () {
                 },
+                renderField: function () {
+                },
                 renderForce: function () {
-                },
-                startCapture: function () {
-                },
-                stopCapture: function () {
                 },
                 reset: function () {
                 }
@@ -114,13 +101,11 @@ class Sketch_8 extends SketchTemplate {
 
         this.sketch.mousedown = function () {
             // this.plotField();
-
             // this.plotForce();
 
 
             // Q2.set(this.mouse.x, this.mouse.y)
             // this.steppedRender();
-
 
         };
 
@@ -175,23 +160,23 @@ class Sketch_8 extends SketchTemplate {
 
             // return
 
-            let scale = 0.01;
-            x = (x - this.width * .5) * scale;
-            y = (y - this.height * .5) * scale;
+            // let scale = 0.01;
+            // x = (x - this.width * .5) * scale;
+            // y = (y - this.height * .5) * scale;
             // let v = new Vector2(Math.sin(y), Math.sin(x));
             // let v = new Vector2(Math.pow(y, 2), Math.pow(x, 2));
-            let v = new Vector2(y, -x);
+            // let v = new Vector2(y, -x);
 
-            return v.angle();
+            // return v.angle();
 
-            return
+            // return
 
 
             // clifford attractor
             // http://paulbourke.net/fractals/clifford/
 
             // scale down x and y
-            // let scale = 0.005;
+            let scale = 0.005;
             x = (x - this.width * .5) * scale;
             y = (y - this.height * .5) * scale;
 
@@ -236,10 +221,7 @@ class Sketch_8 extends SketchTemplate {
         };
 
         this.sketch.update = function () {
-            // this.render();
-
-            this.steppedRender();
-            this.capturer.capture(this._canvas);
+            this.render();
         };
 
 
@@ -336,24 +318,28 @@ class Sketch_8 extends SketchTemplate {
 
         document.getElementById('dat-container').appendChild(this.gui.domElement);
 
-        //this.gui.add(this.sketch.CONFIG, 'BASE').min(1).max(12).step(1).name('BASE').onChange(this.updateParams.bind(this));
 
         this.gui.add(this.sketch.CONFIG, 'DRAWS_PER_CALL').min(100).max(20000).step(1).name('DRAWS_PER_CALL');
-        this.gui.add(this.sketch.CONFIG, 'NUM_RENDER_STEPS').min(1).max(15).step(1).name('NUM_RENDER_STEPS');
+
+        let f_force = this.gui.addFolder('force');
+        f_force.add(this.sketch.CONFIG, 'NUM_RENDER_STEPS').min(1).max(15).step(1).name('NUM_RENDER_STEPS');
+        f_force.add(this.sketch.CONFIG.METHODS, 'renderForce').onChange(this.renderForce.bind(this));
+        f_force.open();
+
+        let f_field = this.gui.addFolder('field');
+        f_field.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
+        f_field.add(this.sketch.CONFIG.METHODS, 'renderField').onChange(this.renderField.bind(this));
+        f_field.open();
+
+        let f_attractor = this.gui.addFolder('clifford attractor');
+        f_attractor.add(this.sketch.CONFIG.ATTRACTOR, 'a').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
+        f_attractor.add(this.sketch.CONFIG.ATTRACTOR, 'b').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
+        f_attractor.add(this.sketch.CONFIG.ATTRACTOR, 'c').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
+        f_attractor.add(this.sketch.CONFIG.ATTRACTOR, 'd').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
+        f_attractor.add(this.sketch.CONFIG.METHODS, 'shuffle').onChange(this.shuffleParameters.bind(this));
+        f_attractor.open();
+
         this.gui.add(this.sketch.CONFIG.METHODS, 'reset').onChange(this.reset.bind(this));
-        this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
-        this.gui.add(this.sketch.CONFIG.METHODS, 'renderForce').onChange(this.renderForce.bind(this));
-        this.gui.add(this.sketch.CONFIG.METHODS, 'startCapture').onChange(this.startCapture.bind(this));
-        this.gui.add(this.sketch.CONFIG.METHODS, 'stopCapture').onChange(this.stopCapture.bind(this));
-
-        let f1 = this.gui.addFolder('clifford attractor');
-        f1.add(this.sketch.CONFIG.ATTRACTOR, 'a').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
-        f1.add(this.sketch.CONFIG.ATTRACTOR, 'b').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
-        f1.add(this.sketch.CONFIG.ATTRACTOR, 'c').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
-        f1.add(this.sketch.CONFIG.ATTRACTOR, 'd').min(-2).max(2).step(.01).onChange(this.updateParams.bind(this)).listen();
-        f1.add(this.sketch.CONFIG.METHODS, 'shuffle').onChange(this.shuffleParameters.bind(this));
-        f1.open();
-
     }
 
     updateParams() {
@@ -374,25 +360,19 @@ class Sketch_8 extends SketchTemplate {
         this.sketch.running = !this.sketch.running;
     }
 
+    renderField() {
+        this.sketch.plotField();
+    }
+
     renderForce() {
         this.sketch.steppedRender();
     }
 
-    startCapture() {
-        this.sketch.running = true;
-        this.sketch.capturer.start();
-    }
-
-    stopCapture() {
-        this.sketch.capturer.stop();
-        this.sketch.capturer.save();
-        this.sketch.running = false;
-    }
 
     reset() {
         this.sketch.clear();
         this.sketch.capturer.stop();
-        this.running = false;
+        this.sketch.running = false;
 
         this.sketch.forceStep = 0;
 
