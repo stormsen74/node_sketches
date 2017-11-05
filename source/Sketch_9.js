@@ -37,11 +37,11 @@ class Sketch_9 extends SketchTemplate {
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
-            AMP: 20,
-            dT: .1,
-            dPhi: .01,
-            TARGET: false,
+            dt_noise_z: .001,
+            noise_scale: .001,
             METHODS: {
+                run: function () {
+                },
                 clear: function () {
                 }
             }
@@ -53,10 +53,10 @@ class Sketch_9 extends SketchTemplate {
 
             console.log('setup');
 
-            // this.globalCompositeOperation = 'copy';
+            this.globalCompositeOperation = 'lighter';
             this.autoclear = false;
             this.lineWidth = 1;
-            this.strokeStyle = 'rgba(200, 200, 200, 1)';
+            this.strokeStyle = 'rgba(200, 200, 200, .1)';
 
             for (let i = 0; i < 750; i++) {
                 this.points.push({
@@ -81,40 +81,19 @@ class Sketch_9 extends SketchTemplate {
 
         this.sketch.draw = function () {
             // console.log('draw')
-            this.fillStyle = "rgba(5,5,5,0.05)";
+            this.fillStyle = "rgba(5,5,5,0.01)";
             this.fillRect(0, 0, this.width, this.height);
-
-            // let res = 20;
-            // for (let x = 0; x < this.width; x += res) {
-            //     for (let y = 0; y < this.height; y += res) {
-            //         let value = this.getValue(x, y);
-            //         this.save();
-            //         this.translate(x, y);
-            //         this.rotate(value);
-            //         this.beginPath();
-            //         this.moveTo(0, 0);
-            //         this.lineTo(res * 1.5, 0);
-            //         this.stroke();
-            //         this.restore();
-            //     }
-            // }
 
 
             for (let i = 0; i < this.points.length; i++) {
                 // get each point and do what we did before with a single point
                 let p = this.points[i];
                 let value = this.getValue(p.x, p.y);
-                p.vx += Math.cos(value) * 0.1;
-                p.vy += Math.sin(value) * 0.1;
+                p.vx += Math.cos(value) * 0.05;
+                p.vy += Math.sin(value) * 0.05;
 
 
-                // this.strokeStyle = chroma.hsl(
-                //     mathUtils.convertToRange(value, [0, 6.2832], [180, 360]),
-                //     .5,
-                //     .5,
-                // ).hex();
-
-                this.strokeStyle = 'hsl(' + value * 10 + ',50%,50%)';
+                this.strokeStyle = 'hsla(' + value * 10 + ', 50% , 50% , .1)';
 
                 // move to current position
                 this.beginPath();
@@ -137,11 +116,11 @@ class Sketch_9 extends SketchTemplate {
                 if (p.y < 0) p.y = this.height;
             }
 
-            this.noise_z += .001;
+            this.noise_z += this.CONFIG.dt_noise_z;
         };
 
         this.sketch.getValue = function (x, y) {
-            var scale = 0.001;
+            var scale = this.CONFIG.noise_scale;
             // return this.simplex.noise2D(x * scale, y * scale) * Math.PI * 2;
             return this.simplex.noise3D(x * scale, y * scale, this.noise_z) * Math.PI * 2;
         };
@@ -171,16 +150,20 @@ class Sketch_9 extends SketchTemplate {
 
         document.getElementById('dat-container').appendChild(this.gui.domElement);
 
-        this.gui.add(this.sketch.CONFIG, 'dT').min(0).max(2).step(.01).name('dT');
-        this.gui.add(this.sketch.CONFIG, 'AMP').min(0).max(300).step(1).name('AMP');
-        this.gui.add(this.sketch.CONFIG, 'dPhi').min(0).max(2).step(.01).name('dPhi');
+        this.gui.add(this.sketch.CONFIG, 'dt_noise_z').min(0).max(.01).step(.001).name('dt_noise_z');
+        this.gui.add(this.sketch.CONFIG, 'noise_scale').min(0).max(.01).step(.001).name('noise_scale');
+        this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'clear').onChange(this.clear.bind(this));
 
     }
 
 
-    updateParams() {
+    run() {
+        this.sketch.running = !this.sketch.running;
+    }
 
+    clear() {
+        this.sketch.clear();
     }
 
 
