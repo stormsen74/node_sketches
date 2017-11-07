@@ -35,6 +35,10 @@ class Sketch_10 extends SketchTemplate {
         this.sketch.CONFIG = {
             dt_noise_z: .001,
             noise_scale: .001,
+            RESOLUTION: {
+                x: 32,
+                y: 18,
+            },
             PARAMETERS: {
                 a: 1,
                 b: -3,
@@ -65,8 +69,8 @@ class Sketch_10 extends SketchTemplate {
         this.sketch.plotField = function () {
 
 
-            for (let x = 0; x < this.width; x += 50) {
-                for (let y = 0; y < this.width; y += 50) {
+            for (let x = this.width / this.CONFIG.RESOLUTION.x * .5; x < this.width; x += this.width / this.CONFIG.RESOLUTION.x) {
+                for (let y = this.height / this.CONFIG.RESOLUTION.y * .5; y < this.height; y += this.height / this.CONFIG.RESOLUTION.y) {
                     this.plotVector(new Point(x, y))
                 }
             }
@@ -84,8 +88,6 @@ class Sketch_10 extends SketchTemplate {
         this.sketch.plotVector = function (p) {
             this.plotPoint(p.x, p.y, 1, 0, '#000000', '#cccccc');
 
-            this.lineWidth = .5;
-            this.strokeStyle = 'hsla(' + 50 + ', 50% , 50% , .9)';
 
             let mappedX = mathUtils.convertToRange(p.x, [0, this.width], [-10, 10]);
             let mappedY = mathUtils.convertToRange(p.y, [0, this.height], [-10, 10]);
@@ -100,6 +102,9 @@ class Sketch_10 extends SketchTemplate {
 
             vField.multiplyScalar(2);
             // vField.negate();
+
+            this.lineWidth = .5;
+            this.strokeStyle = 'hsla(' + mathUtils.convertToRange(vField.angle(), [0, Math.PI * 2], [240, 360]) + ', 50% , 50% , .75)';
 
             this.save();
             this.translate(p.x, p.y);
@@ -145,11 +150,16 @@ class Sketch_10 extends SketchTemplate {
         this.gui.add(this.sketch.CONFIG, 'dt_noise_z').min(0).max(.01).step(.001).name('dt_noise_z');
         this.gui.add(this.sketch.CONFIG, 'noise_scale').min(0).max(.01).step(.001).name('noise_scale');
 
+        let f_resolution = this.gui.addFolder('resolution');
+        f_resolution.add(this.sketch.CONFIG.RESOLUTION, 'x').min(10).max(100).step(1).onChange(this.updatePlot.bind(this)).listen();
+        f_resolution.add(this.sketch.CONFIG.RESOLUTION, 'y').min(10).max(100).step(1).onChange(this.updatePlot.bind(this)).listen();
+        f_resolution.open();
+
         let f_parameters = this.gui.addFolder('parameters');
-        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'a').min(-3).max(3).step(.01).onChange(this.updateParams.bind(this)).listen();
-        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'b').min(-3).max(3).step(.01).onChange(this.updateParams.bind(this)).listen();
-        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'c').min(-3).max(3).step(.01).onChange(this.updateParams.bind(this)).listen();
-        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'd').min(-3).max(3).step(.01).onChange(this.updateParams.bind(this)).listen();
+        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'a').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
+        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'b').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
+        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'c').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
+        f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'd').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
         f_parameters.open();
 
         this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
@@ -157,7 +167,7 @@ class Sketch_10 extends SketchTemplate {
 
     }
 
-    updateParams() {
+    updatePlot() {
         this.sketch.clear();
         this.sketch.plotField();
     }
