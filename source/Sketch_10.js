@@ -18,6 +18,8 @@ class Sketch_10 extends SketchTemplate {
 
         console.log('Sketch_10!');
 
+        // TODO implement simpleParticle (gl-vec) -> force
+
         /*--------------------------------------------
          ~ sketch variables
          --------------------------------------------*/
@@ -62,6 +64,7 @@ class Sketch_10 extends SketchTemplate {
 
             // this.globalCompositeOperation = 'lighter';
 
+            this.running = false;
             this.plotField();
 
         };
@@ -91,31 +94,42 @@ class Sketch_10 extends SketchTemplate {
             let mappedX = mathUtils.convertToRange(p.x, [0, this.width], [-10, 10]);
             let mappedY = mathUtils.convertToRange(p.y, [0, this.height], [-10, 10]);
 
+            /*--------------------------------------------
+             ~ formula
+             --------------------------------------------*/
+
             // formula |x, y|
             // let vField = new Vector2(mappedX, mappedY);
+
+            /*--------------------------------------------
+             ~ system (dat)
+             --------------------------------------------*/
 
             // https://academo.org/demos/vector-field-plotter/
             let vField = new Vector2(
                 this.CONFIG.PARAMETERS.a * mappedX + this.CONFIG.PARAMETERS.b * mappedY,
                 this.CONFIG.PARAMETERS.c * mappedX + this.CONFIG.PARAMETERS.d * mappedY
             );
-            vField.multiplyScalar(5);
             // vField.negate();
+            vField.multiplyScalar(5);
+
+            /*--------------------------------------------
+             ~ perlin field
+             --------------------------------------------*/
+
+            let perlinValue = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
+            vField.set(Math.cos(perlinValue), Math.sin(perlinValue));
+            vField.multiplyScalar(perlinValue * 50);
 
 
-            let angle = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
-
-
-            this.strokeStyle = 'hsla(' + mathUtils.convertToRange(angle, [0, Math.PI * 2], [240, 360]) + ', 50% , 50% , .75)';
+            this.strokeStyle = 'hsla(' + mathUtils.convertToRange(vField.angle(), [0, Math.PI * 2], [240, 360]) + ', 50% , 50% , .75)';
 
             this.save();
             this.translate(p.x, p.y);
-            // this.rotate(vField.angle());
-            this.rotate(angle);
+            this.rotate(vField.angle());
             this.beginPath();
             this.moveTo(0, 0);
-            // this.lineTo(vField.length(), 0);
-            this.lineTo(angle * 45, 0);
+            this.lineTo(vField.length(), 0);
             this.stroke();
             this.restore();
 
@@ -125,10 +139,10 @@ class Sketch_10 extends SketchTemplate {
         };
 
         this.sketch.draw = function () {
-            // this.clear();
+            this.clear();
 
-            this.fillStyle = "rgba(5,5,5,.01)";
-            this.fillRect(0, 0, this.width, this.height);
+            // this.fillStyle = "rgba(5,5,5,.01)";
+            // this.fillRect(0, 0, this.width, this.height);
 
             this.noise_z += this.CONFIG.dt_noise_z;
             this.plotField();
