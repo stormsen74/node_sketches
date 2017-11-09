@@ -7,7 +7,6 @@ var chroma = require('chroma-js');
 var SimplexNoise = require('simplex-noise');
 
 import SketchTemplate from "./SketchTemplate.js";
-import Point from "./geom/Point.js";
 import mathUtils from "./utils/mathUtils.js";
 import {Vector2} from "./math/vector2";
 
@@ -30,6 +29,10 @@ class Sketch_10 extends SketchTemplate {
 
         this.sketch.noise_z = 0;
         this.sketch.simplex = new SimplexNoise(Math.random);
+
+
+        this.sketch.points = [];
+
 
         /*--------------------------------------------
          ~ confif stuff / dat-gui
@@ -56,6 +59,7 @@ class Sketch_10 extends SketchTemplate {
             }
         };
         this.initControls();
+        this.initStats();
 
 
         this.sketch.setup = function () {
@@ -64,8 +68,19 @@ class Sketch_10 extends SketchTemplate {
 
             // this.globalCompositeOperation = 'lighter';
 
+            this.lineWidth = .5;
+
             this.running = false;
-            this.plotField();
+            // this.plotField();
+
+
+            for (let i = 0; i < 1; i++) {
+                this.points.push({
+                    position: new Vector2(mathUtils.getRandomBetween(0, this.width), mathUtils.getRandomBetween(0, this.height)),
+                    velocity: new Vector2(0, 0)
+                })
+            }
+
 
         };
 
@@ -73,7 +88,11 @@ class Sketch_10 extends SketchTemplate {
         this.sketch.plotField = function () {
             for (let x = this.width / this.CONFIG.RESOLUTION.x * .5; x < this.width; x += this.width / this.CONFIG.RESOLUTION.x) {
                 for (let y = this.height / this.CONFIG.RESOLUTION.y * .5; y < this.height; y += this.height / this.CONFIG.RESOLUTION.y) {
-                    this.plotVector(new Point(x, y))
+                    this.plotVector({
+                        position: new Vector2(x, y),
+                        velocity: new Vector2(0, 0)
+
+                    })
                 }
             }
         };
@@ -87,12 +106,31 @@ class Sketch_10 extends SketchTemplate {
             this.mouseIsDown = false;
         };
 
-        this.sketch.plotVector = function (p) {
-            this.plotPoint(p.x, p.y, 1, 0, '#000000', 'hsla(' + 50 + ', 50% , 50% , .75)');
 
+        this.sketch.getFieldVector = function (p) {
+
+            let mappedX = mathUtils.convertToRange(p.position.x, [0, this.width], [-10, 10]);
+            let mappedY = mathUtils.convertToRange(p.position.y, [0, this.height], [-10, 10]);
+
+            // let vField = new Vector2(
+            //     this.CONFIG.PARAMETERS.a * mappedX + this.CONFIG.PARAMETERS.b * mappedY,
+            //     this.CONFIG.PARAMETERS.c * mappedX + this.CONFIG.PARAMETERS.d * mappedY
+            // );
+
+            let vField = new Vector2();
+            let perlinValue = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
+            vField.set(Math.cos(perlinValue), Math.sin(perlinValue));
+
+            return vField;
+
+        };
+
+        this.sketch.plotVector = function (p) {
+            this.plotPoint(p.position.x, p.position.y, 1, 0, '#000000', 'hsla(' + 50 + ', 50% , 50% , .75)');
 
             let mappedX = mathUtils.convertToRange(p.x, [0, this.width], [-10, 10]);
             let mappedY = mathUtils.convertToRange(p.y, [0, this.height], [-10, 10]);
+
 
             /*--------------------------------------------
              ~ formula
@@ -106,26 +144,25 @@ class Sketch_10 extends SketchTemplate {
              --------------------------------------------*/
 
             // https://academo.org/demos/vector-field-plotter/
-            let vField = new Vector2(
-                this.CONFIG.PARAMETERS.a * mappedX + this.CONFIG.PARAMETERS.b * mappedY,
-                this.CONFIG.PARAMETERS.c * mappedX + this.CONFIG.PARAMETERS.d * mappedY
-            );
+            // let vField = new Vector2(
+            //     this.CONFIG.PARAMETERS.a * mappedX + this.CONFIG.PARAMETERS.b * mappedY,
+            //     this.CONFIG.PARAMETERS.c * mappedX + this.CONFIG.PARAMETERS.d * mappedY
+            // );
             // vField.negate();
-            vField.multiplyScalar(5);
+            // vField.multiplyScalar(5);
 
             /*--------------------------------------------
              ~ perlin field
              --------------------------------------------*/
 
-            let perlinValue = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
-            vField.set(Math.cos(perlinValue), Math.sin(perlinValue));
-            vField.multiplyScalar(perlinValue * 50);
+            let vField = this.getFieldVector(p);
+            vField.multiplyScalar(50);
 
 
-            this.strokeStyle = 'hsla(' + mathUtils.convertToRange(vField.angle(), [0, Math.PI * 2], [240, 360]) + ', 50% , 50% , .75)';
+            this.strokeStyle = 'hsla(' + mathUtils.convertToRange(vField.angle(), [0, Math.PI * 2], [240, 360]) + ', 50% , 50% , .1)';
 
             this.save();
-            this.translate(p.x, p.y);
+            this.translate(p.position.x, p.position.y);
             this.rotate(vField.angle());
             this.beginPath();
             this.moveTo(0, 0);
@@ -135,17 +172,53 @@ class Sketch_10 extends SketchTemplate {
 
         };
 
+
+        this.sketch.drawParticles = function () {
+
+            for (let i = 0; i < this.points.length; i++) {
+
+                let p = this.points[i];
+                let vField = this.getFieldVector(p);
+                this.strokeStyle = 'hsla(' + p.velocity.length() * 10 + ', 50% , 50% , 1)';
+                vField.multiplyScalar(.1);
+                p.velocity.add(vField);
+
+                // draw
+                this.beginPath();
+                this.moveTo(p.position.x, p.position.y);
+
+                p.position.add(p.velocity);
+                this.lineTo(p.position.x, p.position.y);
+                this.stroke();
+
+                // friction
+                p.velocity.multiplyScalar(0.99);
+
+                // wrap
+                if (p.position.x > this.width) p.position.x = 0;
+                if (p.position.y > this.height) p.position.y = 0;
+                if (p.position.x < 0) p.position.x = this.width;
+                if (p.position.y < 0) p.position.y = this.height;
+
+            }
+        };
+
         this.sketch.update = function () {
         };
 
         this.sketch.draw = function () {
-            this.clear();
+            // this.clear();
 
-            // this.fillStyle = "rgba(5,5,5,.01)";
-            // this.fillRect(0, 0, this.width, this.height);
+            this.fillStyle = "rgba(5,5,5,.2)";
+            this.fillRect(0, 0, this.width, this.height);
+
+            this.drawParticles()
+            this.plotField();
+
 
             this.noise_z += this.CONFIG.dt_noise_z;
-            this.plotField();
+
+            this.stats.update();
         };
 
         this.sketch.mousemove = function () {
@@ -160,8 +233,15 @@ class Sketch_10 extends SketchTemplate {
 
     kill() {
         document.getElementById('dat-container').removeChild(this.gui.domElement);
+        document.body.removeChild(this.sketch.stats.domElement);
     }
 
+    initStats() {
+        this.sketch.stats = new Stats();
+        this.sketch.stats.domElement.style.position = 'absolute';
+        this.sketch.stats.domElement.style.bottom = '0px';
+        document.body.appendChild(this.sketch.stats.domElement);
+    }
 
     initControls() {
         this.gui = new dat.GUI({
@@ -193,6 +273,9 @@ class Sketch_10 extends SketchTemplate {
     }
 
     updatePlot() {
+
+        return;
+
         this.sketch.clear();
         this.sketch.plotField();
     }
