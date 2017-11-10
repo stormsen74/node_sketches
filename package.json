@@ -12,16 +12,17 @@
   "dependencies": {
     "chroma-js": "^1.3.4",
     "chromatism": "^2.6.0",
+    "gl-vec2": "^1.0.0",
     "gsap": "^1.19.0",
     "raf": "^3.3.0",
     "simplex-noise": "^2.3.0",
     "sketch-js": "^1.1.3"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.18.0",
-    "babelify": "^7.3.0",
-    "browserify": "^13.1.1",
-    "budo": "^9.4.5",
-    "uglify-js": "^2.7.5"
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "^8.0.0",
+    "browserify": "^14.5.0",
+    "budo": "^10.0.4",
+    "uglify-js": "^3.1.8"
   }
 }

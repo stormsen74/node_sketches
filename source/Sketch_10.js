@@ -3,8 +3,9 @@
  */
 
 
-var chroma = require('chroma-js');
-var SimplexNoise = require('simplex-noise');
+let chroma = require('chroma-js');
+let SimplexNoise = require('simplex-noise');
+let vec2 = require('gl-vec2')
 
 import SketchTemplate from "./SketchTemplate.js";
 import mathUtils from "./utils/mathUtils.js";
@@ -18,20 +19,25 @@ class Sketch_10 extends SketchTemplate {
         console.log('Sketch_10!');
 
         // TODO implement simpleParticle (gl-vec) -> force
+        // https://github.com/stackgl/gl-vec2
 
         /*--------------------------------------------
          ~ sketch variables
          --------------------------------------------*/
 
         this.sketch.mouseIsDown = false;
-        this.sketch.vTarget = new Vector2(0, this.sketch.height * .5);
         this.sketch.vCenter = new Vector2(this.sketch.width * .5, this.sketch.height * .5);
 
         this.sketch.noise_z = 0;
         this.sketch.simplex = new SimplexNoise(Math.random);
 
 
-        this.sketch.points = [];
+        this.sketch.particles = [];
+
+
+        let v = vec2.create();
+        vec2.set(v, 10, 10);
+        console.log(v)
 
 
         /*--------------------------------------------
@@ -74,10 +80,11 @@ class Sketch_10 extends SketchTemplate {
             // this.plotField();
 
 
-            for (let i = 0; i < 1; i++) {
-                this.points.push({
+            for (let i = 0; i < 500; i++) {
+                this.particles.push({
                     position: new Vector2(mathUtils.getRandomBetween(0, this.width), mathUtils.getRandomBetween(0, this.height)),
-                    velocity: new Vector2(0, 0)
+                    velocity: new Vector2(0, 0),
+                    mass: 1
                 })
             }
 
@@ -89,9 +96,7 @@ class Sketch_10 extends SketchTemplate {
             for (let x = this.width / this.CONFIG.RESOLUTION.x * .5; x < this.width; x += this.width / this.CONFIG.RESOLUTION.x) {
                 for (let y = this.height / this.CONFIG.RESOLUTION.y * .5; y < this.height; y += this.height / this.CONFIG.RESOLUTION.y) {
                     this.plotVector({
-                        position: new Vector2(x, y),
-                        velocity: new Vector2(0, 0)
-
+                        position: new Vector2(x, y)
                     })
                 }
             }
@@ -112,26 +117,6 @@ class Sketch_10 extends SketchTemplate {
             let mappedX = mathUtils.convertToRange(p.position.x, [0, this.width], [-10, 10]);
             let mappedY = mathUtils.convertToRange(p.position.y, [0, this.height], [-10, 10]);
 
-            // let vField = new Vector2(
-            //     this.CONFIG.PARAMETERS.a * mappedX + this.CONFIG.PARAMETERS.b * mappedY,
-            //     this.CONFIG.PARAMETERS.c * mappedX + this.CONFIG.PARAMETERS.d * mappedY
-            // );
-
-            let vField = new Vector2();
-            let perlinValue = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
-            vField.set(Math.cos(perlinValue), Math.sin(perlinValue));
-
-            return vField;
-
-        };
-
-        this.sketch.plotVector = function (p) {
-            this.plotPoint(p.position.x, p.position.y, 1, 0, '#000000', 'hsla(' + 50 + ', 50% , 50% , .75)');
-
-            let mappedX = mathUtils.convertToRange(p.x, [0, this.width], [-10, 10]);
-            let mappedY = mathUtils.convertToRange(p.y, [0, this.height], [-10, 10]);
-
-
             /*--------------------------------------------
              ~ formula
              --------------------------------------------*/
@@ -148,18 +133,31 @@ class Sketch_10 extends SketchTemplate {
             //     this.CONFIG.PARAMETERS.a * mappedX + this.CONFIG.PARAMETERS.b * mappedY,
             //     this.CONFIG.PARAMETERS.c * mappedX + this.CONFIG.PARAMETERS.d * mappedY
             // );
-            // vField.negate();
-            // vField.multiplyScalar(5);
 
             /*--------------------------------------------
              ~ perlin field
              --------------------------------------------*/
 
+            let vField = new Vector2();
+            let perlinValue = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
+            vField.set(Math.cos(perlinValue), Math.sin(perlinValue));
+
+
+            // vField.negate();
+            // vField.multiplyScalar(5);
+            return vField;
+
+        };
+
+        this.sketch.plotVector = function (p) {
+            this.plotPoint(p.position.x, p.position.y, 1, 0, '#000000', 'hsla(' + 50 + ', 50% , 50% , .5)');
+
+
             let vField = this.getFieldVector(p);
             vField.multiplyScalar(50);
 
 
-            this.strokeStyle = 'hsla(' + mathUtils.convertToRange(vField.angle(), [0, Math.PI * 2], [240, 360]) + ', 50% , 50% , .1)';
+            this.strokeStyle = 'hsla(' + mathUtils.convertToRange(vField.angle(), [0, Math.PI * 2], [240, 360]) + ', 50% , 50% , .3)';
 
             this.save();
             this.translate(p.position.x, p.position.y);
@@ -175,12 +173,13 @@ class Sketch_10 extends SketchTemplate {
 
         this.sketch.drawParticles = function () {
 
-            for (let i = 0; i < this.points.length; i++) {
+            for (let i = 0; i < this.particles.length; i++) {
 
-                let p = this.points[i];
+                let p = this.particles[i];
                 let vField = this.getFieldVector(p);
                 this.strokeStyle = 'hsla(' + p.velocity.length() * 10 + ', 50% , 50% , 1)';
                 vField.multiplyScalar(.1);
+                // vField = Vector2.divide(vField, p.mass);
                 p.velocity.add(vField);
 
                 // draw
@@ -212,8 +211,8 @@ class Sketch_10 extends SketchTemplate {
             this.fillStyle = "rgba(5,5,5,.2)";
             this.fillRect(0, 0, this.width, this.height);
 
-            this.drawParticles()
-            this.plotField();
+            this.drawParticles();
+            // this.plotField();
 
 
             this.noise_z += this.CONFIG.dt_noise_z;
@@ -258,14 +257,13 @@ class Sketch_10 extends SketchTemplate {
         let f_resolution = this.gui.addFolder('resolution');
         f_resolution.add(this.sketch.CONFIG.RESOLUTION, 'x').min(10).max(100).step(1).onChange(this.updatePlot.bind(this)).listen();
         f_resolution.add(this.sketch.CONFIG.RESOLUTION, 'y').min(10).max(100).step(1).onChange(this.updatePlot.bind(this)).listen();
-        f_resolution.open();
 
         let f_parameters = this.gui.addFolder('parameters');
         f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'a').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
         f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'b').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
         f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'c').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
         f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'd').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
-        f_parameters.open();
+        // f_parameters.open();
 
         this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'clear').onChange(this.clear.bind(this));
