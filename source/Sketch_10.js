@@ -5,7 +5,6 @@
 
 let chroma = require('chroma-js');
 let SimplexNoise = require('simplex-noise');
-let vec2 = require('gl-vec2')
 
 import SketchTemplate from "./SketchTemplate.js";
 import mathUtils from "./utils/mathUtils.js";
@@ -33,22 +32,18 @@ class Sketch_10 extends SketchTemplate {
 
 
         this.sketch.particles = [];
-
-
-        let v = vec2.create();
-        vec2.set(v, 10, 10);
-        console.log(v)
+        this.sketch.palette = chroma.scale(['#fafa6e', '#2A4858']).mode('lch').colors(10);
 
 
         /*--------------------------------------------
-         ~ confif stuff / dat-gui
+         ~ config stuff / dat-gui
          --------------------------------------------*/
 
         this.sketch.CONFIG = {
             dt_noise_z: .001,
             noise_scale: .005,
             RESOLUTION: {
-                x: 20,
+                x: 17,
                 y: 15
             },
             PARAMETERS: {
@@ -57,6 +52,13 @@ class Sketch_10 extends SketchTemplate {
                 c: 3,
                 d: -3
             },
+            OPTIONS: {
+                opacity: .2
+            },
+            DRAW_FIELD: false,
+            DRAW_PARTICLES: false,
+            DRAW_glPARTICLES: true,
+            OVERDRAW: true,
             METHODS: {
                 run: function () {
                 },
@@ -77,18 +79,19 @@ class Sketch_10 extends SketchTemplate {
             this.lineWidth = .5;
 
             this.running = false;
-            // this.plotField();
+            this.plotField();
 
+            this.initParticles();
 
-            for (let i = 0; i < 500; i++) {
+        };
+
+        this.sketch.initParticles = function () {
+            for (let i = 0; i < 3000; i++) {
                 this.particles.push({
                     position: new Vector2(mathUtils.getRandomBetween(0, this.width), mathUtils.getRandomBetween(0, this.height)),
-                    velocity: new Vector2(0, 0),
-                    mass: 1
+                    velocity: new Vector2(0, 0)
                 })
             }
-
-
         };
 
 
@@ -149,6 +152,7 @@ class Sketch_10 extends SketchTemplate {
 
         };
 
+
         this.sketch.plotVector = function (p) {
             this.plotPoint(p.position.x, p.position.y, 1, 0, '#000000', 'hsla(' + 50 + ', 50% , 50% , .5)');
 
@@ -177,7 +181,8 @@ class Sketch_10 extends SketchTemplate {
 
                 let p = this.particles[i];
                 let vField = this.getFieldVector(p);
-                this.strokeStyle = 'hsla(' + p.velocity.length() * 10 + ', 50% , 50% , 1)';
+                // this.strokeStyle = 'hsla(' + p.velocity.length() * 10 + ', 50% , 50% , 1)';
+                this.strokeStyle = this.palette[Math.floor(parseInt(Math.min(p.velocity.length())))];
                 vField.multiplyScalar(.1);
                 // vField = Vector2.divide(vField, p.mass);
                 p.velocity.add(vField);
@@ -202,18 +207,21 @@ class Sketch_10 extends SketchTemplate {
             }
         };
 
+
         this.sketch.update = function () {
         };
 
         this.sketch.draw = function () {
-            // this.clear();
 
-            this.fillStyle = "rgba(5,5,5,.2)";
-            this.fillRect(0, 0, this.width, this.height);
+            if (!this.CONFIG.OVERDRAW) {
+                this.clear();
+            } else {
+                this.fillStyle = "rgba(5,5,5," + this.CONFIG.OPTIONS.opacity + ")";
+                this.fillRect(0, 0, this.width, this.height);
+            }
 
-            this.drawParticles();
-            // this.plotField();
-
+            if (this.CONFIG.DRAW_FIELD) this.plotField();
+            if (this.CONFIG.DRAW_PARTICLES) this.drawParticles();
 
             this.noise_z += this.CONFIG.dt_noise_z;
 
@@ -263,19 +271,29 @@ class Sketch_10 extends SketchTemplate {
         f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'b').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
         f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'c').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
         f_parameters.add(this.sketch.CONFIG.PARAMETERS, 'd').min(-3).max(3).step(.01).onChange(this.updatePlot.bind(this)).listen();
+
         // f_parameters.open();
+
+        let f_options = this.gui.addFolder('options');
+        f_options.add(this.sketch.CONFIG.OPTIONS, 'opacity').min(0.001).max(1).step(.001).onChange(this.updatePlot.bind(this)).listen();
 
         this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'clear').onChange(this.clear.bind(this));
+
+        this.gui.add(this.sketch.CONFIG, 'DRAW_FIELD').name('DRAW_FIELD');
+        this.gui.add(this.sketch.CONFIG, 'DRAW_PARTICLES').name('DRAW_PARTICLES');
+        this.gui.add(this.sketch.CONFIG, 'OVERDRAW').name('OVERDRAW');
 
     }
 
     updatePlot() {
 
-        return;
 
-        this.sketch.clear();
-        this.sketch.plotField();
+        if (!this.sketch.running) {
+            this.sketch.clear();
+            this.sketch.plotField();
+        }
+
     }
 
 
