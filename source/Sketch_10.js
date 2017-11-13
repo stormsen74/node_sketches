@@ -86,7 +86,7 @@ class Sketch_10 extends SketchTemplate {
         };
 
         this.sketch.initParticles = function () {
-            for (let i = 0; i < 3000; i++) {
+            for (let i = 0; i < 1000; i++) {
                 this.particles.push({
                     position: new Vector2(mathUtils.getRandomBetween(0, this.width), mathUtils.getRandomBetween(0, this.height)),
                     velocity: new Vector2(0, 0)
