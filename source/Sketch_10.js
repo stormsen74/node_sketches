@@ -30,9 +30,11 @@ class Sketch_10 extends SketchTemplate {
         this.sketch.noise_z = 0;
         this.sketch.simplex = new SimplexNoise(Math.random);
 
-
         this.sketch.particles = [];
         this.sketch.palette = chroma.scale(['#fafa6e', '#2A4858']).mode('lch').colors(10);
+
+        this.sketch.img = new Image();
+        this.sketch.imgData = null;
 
 
         /*--------------------------------------------
@@ -41,7 +43,7 @@ class Sketch_10 extends SketchTemplate {
 
         this.sketch.CONFIG = {
             dt_noise_z: .001,
-            noise_scale: .005,
+            noise_scale: .01,
             RESOLUTION: {
                 x: 17,
                 y: 15
@@ -53,10 +55,11 @@ class Sketch_10 extends SketchTemplate {
                 d: -3
             },
             OPTIONS: {
-                opacity: .2
+                opacity: .2,
+                vFieldScale: .05
             },
             DRAW_FIELD: false,
-            DRAW_PARTICLES: false,
+            DRAW_PARTICLES: true,
             DRAW_glPARTICLES: true,
             OVERDRAW: true,
             METHODS: {
@@ -80,9 +83,50 @@ class Sketch_10 extends SketchTemplate {
 
             this.running = false;
             this.plotField();
+            // this.initParticles();
+            this.initImage(this);
 
-            this.initParticles();
+        };
 
+        this.sketch.sampleColors = function () {
+
+            this.drawImage(this.img, 0, 0);
+            this.imgData = this.getImageData(0, 0, this.img.width, this.img.height);
+
+            let w = this.img.width;
+            let h = this.img.height;
+            console.log(w, h)
+            let dSample = 3;
+            this.tracedPoints = [];
+            for (let x = 0; x < w; x += dSample) {
+                for (let y = 0; y < h; y += dSample) {
+                    //let index = x + y * w;
+                    //let c = this.getImageData(x, y, 1, 1).data;
+                    //let b = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2];
+                    if (this.getImageData(x, y, 1, 1).data[1] > 10) {
+                        this.tracedPoints.push([x, y]);
+                    }
+                }
+            }
+
+            console.log('>', this.tracedPoints.length);
+
+            this.tracedPoints.forEach((p)=> {
+                let dx = p[0];
+                let dy = p[1];
+                p[0] = this.vCenter.x - 128 + dx;
+                p[1] = this.vCenter.y - 128 + dy;
+            });
+
+            this.initTracedParticles();
+
+        };
+
+        this.sketch.initImage = function (that) {
+            this.img.src = 'assets/images/sw_256.png';
+            this.img.onload = function () {
+                that.sampleColors();
+            };
         };
 
         this.sketch.initParticles = function () {
@@ -94,6 +138,14 @@ class Sketch_10 extends SketchTemplate {
             }
         };
 
+        this.sketch.initTracedParticles = function () {
+            this.tracedPoints.forEach((p, i)=> {
+                this.particles.push({
+                    position: new Vector2(p[0], p[1]),
+                    velocity: new Vector2(0, 0)
+                })
+            })
+        };
 
         this.sketch.plotField = function () {
             for (let x = this.width / this.CONFIG.RESOLUTION.x * .5; x < this.width; x += this.width / this.CONFIG.RESOLUTION.x) {
@@ -177,13 +229,12 @@ class Sketch_10 extends SketchTemplate {
 
         this.sketch.drawParticles = function () {
 
-            for (let i = 0; i < this.particles.length; i++) {
-
-                let p = this.particles[i];
+            this.particles.forEach((p, i) => {
+                // let p = this.particles[i];
                 let vField = this.getFieldVector(p);
                 // this.strokeStyle = 'hsla(' + p.velocity.length() * 10 + ', 50% , 50% , 1)';
                 this.strokeStyle = this.palette[Math.floor(parseInt(Math.min(p.velocity.length())))];
-                vField.multiplyScalar(.1);
+                vField.multiplyScalar(this.CONFIG.OPTIONS.vFieldScale);
                 // vField = Vector2.divide(vField, p.mass);
                 p.velocity.add(vField);
 
@@ -203,8 +254,8 @@ class Sketch_10 extends SketchTemplate {
                 if (p.position.y > this.height) p.position.y = 0;
                 if (p.position.x < 0) p.position.x = this.width;
                 if (p.position.y < 0) p.position.y = this.height;
+            })
 
-            }
         };
 
 
@@ -276,6 +327,7 @@ class Sketch_10 extends SketchTemplate {
 
         let f_options = this.gui.addFolder('options');
         f_options.add(this.sketch.CONFIG.OPTIONS, 'opacity').min(0.001).max(1).step(.001).onChange(this.updatePlot.bind(this)).listen();
+        f_options.add(this.sketch.CONFIG.OPTIONS, 'vFieldScale').min(0.001).max(.1).step(.001).onChange(this.updatePlot.bind(this)).listen();
 
         this.gui.add(this.sketch.CONFIG.METHODS, 'run').onChange(this.run.bind(this));
         this.gui.add(this.sketch.CONFIG.METHODS, 'clear').onChange(this.clear.bind(this));
