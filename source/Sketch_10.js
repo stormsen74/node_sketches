@@ -83,8 +83,8 @@ class Sketch_10 extends SketchTemplate {
 
             this.running = false;
             this.plotField();
-            // this.initParticles();
-            this.initImage(this);
+            this.initParticles();
+            // this.initImage(this);
 
         };
 
@@ -96,7 +96,7 @@ class Sketch_10 extends SketchTemplate {
             let w = this.img.width;
             let h = this.img.height;
             console.log(w, h)
-            let dSample = 3;
+            let dSample = 4;
             this.tracedPoints = [];
 
             // for (let x = 0; x < w; x += dSample) {

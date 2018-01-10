@@ -32,7 +32,9 @@ class mathUtils {
 
     static convertToRange(value, srcRange = [], dstRange = []) {
 
-        if (value < srcRange[0] || value > srcRange[1]) return 0;
+        // if (value < srcRange[0] || value > srcRange[1]) return 0;
+        if (value < srcRange[0]) return dstRange[0];
+        if (value > srcRange[1]) return dstRange[1];
 
         let srcMax = srcRange[1] - srcRange[0], dstMax = dstRange[1] - dstRange[0], adjValue = value - srcRange[0];
 
