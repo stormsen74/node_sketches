@@ -13,6 +13,7 @@ import Sketch_7 from "./Sketch_7.js";
 import Sketch_8 from "./Sketch_8.js";
 import Sketch_9 from "./Sketch_9.js";
 import Sketch_10 from "./Sketch_10.js";
+import Sketch_11 from "./Sketch_11.js";
 
 
 class Sketches {
@@ -33,7 +34,8 @@ class Sketches {
             Sketch_7,
             Sketch_8,
             Sketch_9,
-            Sketch_10
+            Sketch_10,
+            Sketch_11
         ];
 
 

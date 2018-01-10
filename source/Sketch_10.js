@@ -83,8 +83,8 @@ class Sketch_10 extends SketchTemplate {
 
             this.running = false;
             this.plotField();
-            // this.initParticles();
-            this.initImage(this);
+            this.initParticles();
+            // this.initImage(this);
 
         };
 
