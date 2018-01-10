@@ -43,7 +43,7 @@ class Sketch_10 extends SketchTemplate {
 
         this.sketch.CONFIG = {
             dt_noise_z: .001,
-            noise_scale: .01,
+            noise_scale: .033,
             RESOLUTION: {
                 x: 17,
                 y: 15
@@ -56,7 +56,7 @@ class Sketch_10 extends SketchTemplate {
             },
             OPTIONS: {
                 opacity: .2,
-                vFieldScale: .05
+                vFieldScale: .1
             },
             DRAW_FIELD: false,
             DRAW_PARTICLES: true,
@@ -98,24 +98,35 @@ class Sketch_10 extends SketchTemplate {
             console.log(w, h)
             let dSample = 3;
             this.tracedPoints = [];
-            for (let x = 0; x < w; x += dSample) {
-                for (let y = 0; y < h; y += dSample) {
-                    //let index = x + y * w;
-                    //let c = this.getImageData(x, y, 1, 1).data;
-                    //let b = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2];
-                    if (this.getImageData(x, y, 1, 1).data[1] > 10) {
-                        this.tracedPoints.push([x, y]);
-                    }
+
+            // for (let x = 0; x < w; x += dSample) {
+            //     for (let y = 0; y < h; y += dSample) {
+            //         //let index = x + y * w;
+            //         //let c = this.getImageData(x, y, 1, 1).data;
+            //         //let b = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2];
+            //         if (this.getImageData(x, y, 1, 1).data[1] > 10) {
+            //             this.tracedPoints.push([x, y]);
+            //         }
+            //     }
+            // }
+
+            for (let s = 0; s < 9000; s += 1) {
+                let rnd_x = Math.random() * w;
+                let rnd_y = Math.random() * h;
+                if (this.getImageData(rnd_x, rnd_y, 1, 1).data[1] > 10) {
+                    this.tracedPoints.push([rnd_x, rnd_y]);
                 }
             }
+
 
             console.log('>', this.tracedPoints.length);
 
             this.tracedPoints.forEach((p)=> {
+                let scale = 4;
                 let dx = p[0];
                 let dy = p[1];
-                p[0] = this.vCenter.x - 128 + dx;
-                p[1] = this.vCenter.y - 128 + dy;
+                p[0] = this.vCenter.x - 64 * scale + dx * scale;
+                p[1] = this.vCenter.y - 64 * scale + dy * scale;
             });
 
             this.initTracedParticles();
@@ -123,7 +134,7 @@ class Sketch_10 extends SketchTemplate {
         };
 
         this.sketch.initImage = function (that) {
-            this.img.src = 'assets/images/sw_256.png';
+            this.img.src = 'assets/images/sw_128_txt.png';
             this.img.onload = function () {
                 that.sampleColors();
             };
