@@ -53,7 +53,12 @@ class Sketch_11 extends SketchTemplate {
         this.sketch.epsilon = 0.0001;
         this.sketch.particles = [];
         this.sketch.nParticles = 1250;
+        // this.sketch.nParticles = 1;
         this.sketch.vMouse = new Vector2();
+
+
+        this.sketch.colorMap = chromatism.fade(10, '#ddb321', '#21d6dd').hex;
+        console.log(this.sketch.colorMap)
 
 
         /*--------------------------------------------
@@ -96,7 +101,7 @@ class Sketch_11 extends SketchTemplate {
             let dy = this.getNoise(pos.x, pos.y + this.epsilon) - this.getNoise(pos.x, pos.y - this.epsilon);
             let v = new Vector2(dy, -dx);
             return v.multiplyScalar(this.CONFIG.STRENGTH / this.epsilon);
-        }
+        };
 
         this.sketch.mousedown = function () {
             this.running = true;
@@ -108,22 +113,21 @@ class Sketch_11 extends SketchTemplate {
 
         this.sketch.draw = function () {
 
-
             this.fillRect(0, 0, this.width, this.height);
-
 
             for (let i = 0; i < this.nParticles; i++) {
                 let p = this.particles[i];
-                // let v = Vector2.add(this.off, p);
                 let pos = p.clone().multiplyScalar(this.CONFIG.NOISE_SCALE);
                 let dir = this.curlNoise(pos);
+
+                // console.log(parseInt(MathUtils.convertToRange(dir.length(), [0, 10], [0, this.colorMap.length])));
+                this.strokeStyle = this.colorMap[parseInt(MathUtils.convertToRange(dir.length(), [0, 15], [0, this.colorMap.length]))];
 
                 // this.save();
 
                 this.beginPath();
                 this.moveTo(p.x, p.y);
-                p.x += dir.x;
-                p.y += dir.y;
+                p.add(dir);
                 this.lineTo(p.x, p.y);
                 this.stroke();
 
