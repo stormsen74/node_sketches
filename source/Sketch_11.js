@@ -58,7 +58,7 @@ class Sketch_11 extends SketchTemplate {
         this.sketch.noise_z = 0;
         this.sketch.epsilon = 0.0001;
         this.sketch.particles = [];
-        this.sketch.nParticles = 1250;
+        this.sketch.nParticles = 100;
         // this.sketch.nParticles = 1;
         this.sketch.vMouse = new Vector2();
 
@@ -96,7 +96,6 @@ class Sketch_11 extends SketchTemplate {
 
         this.sketch.getNoise = function (x, y) {
             return !this.CONFIG.NOISE_3D ? this.noise.noise2D(x, y) : this.noise.noise3D(x, y, this.noise_z);
-            // return this.noise.noise3D(x, y, this.noise_z);
         };
 
 

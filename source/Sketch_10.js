@@ -188,7 +188,12 @@ class Sketch_10 extends SketchTemplate {
              --------------------------------------------*/
 
             // formula |x, y|
-            // let vField = new Vector2(mappedX, mappedY);
+            let vField = new Vector2(mappedX, mappedY);
+            // let vField = new Vector2(-mappedY, mappedX);
+            // let vField = new Vector2(
+            //     Math.cos(mappedX + mappedX),
+            //     Math.sin(mappedX * mappedY)
+            // );
 
             /*--------------------------------------------
              ~ system (dat)
@@ -204,13 +209,13 @@ class Sketch_10 extends SketchTemplate {
              ~ perlin field
              --------------------------------------------*/
 
-            let vField = new Vector2();
-            let perlinValue = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
-            vField.set(Math.cos(perlinValue), Math.sin(perlinValue));
+            // let vField = new Vector2();
+            // let perlinValue = this.simplex.noise3D(mappedX * this.CONFIG.noise_scale, mappedY * this.CONFIG.noise_scale, this.noise_z) * Math.PI * 2;
+            // vField.set(Math.cos(perlinValue), Math.sin(perlinValue));
 
 
             // vField.negate();
-            // vField.multiplyScalar(5);
+            // vField.multiplyScalar(.1);
             return vField;
 
         };
