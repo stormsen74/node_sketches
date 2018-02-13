@@ -160,14 +160,14 @@ class Sketch_8 extends SketchTemplate {
 
             // return
 
-            let scale = 0.01;
-            x = (x - this.width * .5) * scale;
-            y = (y - this.height * .5) * scale;
-            // let v = new Vector2(Math.sin(y), Math.sin(x));
-            let v = new Vector2(Math.pow(y, 2), Math.pow(x, 2));
+            // let scale = 0.01;
+            // x = (x - this.width * .5) * scale;
+            // y = (y - this.height * .5) * scale;
+            // // let v = new Vector2(Math.sin(y), Math.sin(x));
+            // let v = new Vector2(Math.pow(y, 2), Math.pow(x, 2));
             // let v = new Vector2(y, -x);
             
-            return v.angle();
+            // return v.angle();
 
             // return
 
@@ -177,16 +177,16 @@ class Sketch_8 extends SketchTemplate {
 
             // scale down x and y
 
-            // let scale = 0.005;
-            // x = (x - this.width * .5) * scale;
-            // y = (y - this.height * .5) * scale;
-            //
-            // // attactor gives new x, y for old one.
-            // let x1 = Math.sin(this.CONFIG.ATTRACTOR.a * y) + this.CONFIG.ATTRACTOR.c * Math.cos(this.CONFIG.ATTRACTOR.a * x);
-            // let y1 = Math.sin(this.CONFIG.ATTRACTOR.b * x) + this.CONFIG.ATTRACTOR.d * Math.cos(this.CONFIG.ATTRACTOR.b * y);
-            //
-            // // find angle from old to new. that's the value.
-            // return Math.atan2(y1 - y, x1 - x);
+            let scale = 0.005;
+            x = (x - this.width * .5) * scale;
+            y = (y - this.height * .5) * scale;
+
+            // attactor gives new x, y for old one.
+            let x1 = Math.sin(this.CONFIG.ATTRACTOR.a * y) + this.CONFIG.ATTRACTOR.c * Math.cos(this.CONFIG.ATTRACTOR.a * x);
+            let y1 = Math.sin(this.CONFIG.ATTRACTOR.b * x) + this.CONFIG.ATTRACTOR.d * Math.cos(this.CONFIG.ATTRACTOR.b * y);
+
+            // find angle from old to new. that's the value.
+            return Math.atan2(y1 - y, x1 - x);
         };
 
 
