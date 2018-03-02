@@ -42,7 +42,7 @@ class Sketch_1 extends SketchTemplate {
                 clear: function () {
                 }
             }
-        }
+        };
         this.initControls();
 
 
