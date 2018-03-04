@@ -58,7 +58,7 @@ class Sketch_11 extends SketchTemplate {
         this.sketch.noise_z = 0;
         this.sketch.epsilon = 0.0001;
         this.sketch.particles = [];
-        this.sketch.nParticles = 100;
+        this.sketch.nParticles = 150;
         // this.sketch.nParticles = 1;
         this.sketch.vMouse = new Vector2();
 

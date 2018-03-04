@@ -20,7 +20,7 @@
         #close {
             position: absolute;
             left: 0;
-            top: 0;
+            bottom: 0;
             font-weight: bold;
             font-size: 50px;
             color: #fff;
@@ -44,5 +44,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
 <script src="bundle.js"></script>
+<script>
+    javascript:(function () {
+        var script = document.createElement('script');
+        script.onload = function () {
+            var stats = new Stats();
+            document.body.appendChild(stats.dom);
+            requestAnimationFrame(function loop() {
+                stats.update();
+                requestAnimationFrame(loop)
+            });
+        };
+        script.src = '//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';
+        document.head.appendChild(script);
+    })()
+</script>
 </body>
 </html>
