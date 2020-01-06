@@ -129,7 +129,7 @@ class Sketch_12 extends SketchTemplate {
             let eVecRes = new Vector2();
             let _field = new Vector2();
 
-            for (var i = 0; i < this.fields.length; i++) {
+            for (let i = 0; i < this.fields.length; i++) {
                 _field = this.fields[i];
                 _field.rVec = Vector2.subtract(vLocation, _field);
                 _field.eVec = _field.rVec.clone();
@@ -137,7 +137,7 @@ class Sketch_12 extends SketchTemplate {
                 _field.eVec.multiplyScalar(1 / Math.pow(_field.rVec.length(), 2));
                 _field.eVec.multiplyScalar(100000);
 
-                i == 0 ? eVecRes = this.fields[0].eVec : eVecRes.add(this.fields[i].eVec);
+                i === 0 ? eVecRes = this.fields[0].eVec : eVecRes.add(this.fields[i].eVec);
             }
 
             return eVecRes;
@@ -232,11 +232,12 @@ class Sketch_12 extends SketchTemplate {
 
 
     onDragEnd() {
-        //this.sketch.updateDraw();
     };
 
     kill() {
         document.getElementById('dat-container').removeChild(this.gui.domElement);
+        document.getElementById('screen').removeChild(this.sketch.pStart);
+        document.getElementById('screen').removeChild(this.sketch.pEnd);
     }
 
     initControls() {
@@ -253,7 +254,6 @@ class Sketch_12 extends SketchTemplate {
 
         let points = this.gui.addFolder('points');
         points.add(this.sketch.CONFIG.POINTS, 'maxPoints').min(10).max(1000).step(1).name('maxPoints');
-        // points.add(this.sketch.CONFIG.METHODS, 'renderForce').onChange(this.renderForce.bind(this));
         points.open();
 
         let f_options = this.gui.addFolder('options');
