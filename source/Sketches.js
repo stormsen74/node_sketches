@@ -49,10 +49,10 @@ class Sketches {
             console.log(i)
             let node = document.createElement('div');
             let text = document.createElement('div');
-            let path = 'assets/sketch_thumbs/thumb_' + i + '.png';
+            // let path = 'assets/sketch_thumbs/thumb_' + i + '.png';
             node._id = i;
             node.classList.add('select_box');
-            node.style.background = 'url(' + path + ')';
+            // node.style.background = 'url(' + path + ')';
             node.appendChild(text);
 
             text.classList.add('select_text');
